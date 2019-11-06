@@ -76,3 +76,7 @@ func (shoe *Shoe) Take() *Card {
 	// return this to the user
 	return topCard
 }
+
+func (shoe *Shoe) Burn() {
+	_ = shoe.Take()
+}

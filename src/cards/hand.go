@@ -20,6 +20,14 @@ func (hand *Hand) Add(card *Card) {
 	hand.Cards = append(hand.Cards, card)
 }
 
+// Split returns a second hand
+func (hand *Hand) Split() (splitHand *Hand) {
+	splitHand.Cards = []*Card{hand.Cards[1]}
+	hand.Cards = []*Card{hand.Cards[0]}
+	splitHand.Wager = hand.Wager
+	return
+}
+
 // FlipUp is used by the dealer to reveal all the cards
 func (hand *Hand) FlipUp() {
 	for _, card := range hand.Cards {
@@ -45,6 +53,24 @@ func (hand *Hand) Value() (sum int, hasAce bool) {
 		sum -= 10
 	}
 	return
+}
+
+func (hand *Hand) Result(dealerHand *Hand) string {
+	playerHandValue, _ := hand.Value()
+	dealerHandValue, _ := dealerHand.Value()
+	switch {
+	case playerHandValue > 21:
+		return "BUST"
+	case playerHandValue == 21:
+		return "BLACKJACK"
+	case dealerHandValue > 21:
+		return "WIN"
+	case playerHandValue == dealerHandValue:
+		return "PUSH"
+	case playerHandValue > dealerHandValue:
+		return "WIN"
+	}
+	return "LOSE"
 }
 
 // Stringify turns the hand into a string
