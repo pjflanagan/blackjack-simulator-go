@@ -6,47 +6,62 @@ import (
 
 // Player is the base class for all players (excluding dealer)
 type Player interface {
-	Move() string
+	CanBet(minBet int) bool
+	Bet(minBet int, count int) int
+	Move(handIdx int) string
 	Payout(dealerHand *cards.Hand)
+	IsTurnOver(handIdx int) bool
 	// base
-	HandString() string
-	Deal(card *cards.Card)
+	Deal(handIdx int, card *cards.Card)
 	Reset()
+	LeaveSeat()
+	GetHands() []*cards.Hand
+	IsActive() bool
+	HandString(handIdx int) string
 }
 
 type basePlayer struct {
-	Hands      []*cards.Hand
-	ActiveHand int
-	Chips      int
+	Hands  []*cards.Hand
+	Chips  int
+	Active bool
 }
 
 func initBasePlayer() basePlayer {
 	return basePlayer{
-		Hands:      []*cards.Hand{cards.NewHand()},
-		Chips:      100,
-		ActiveHand: 0,
+		Hands:  []*cards.Hand{cards.NewHand()},
+		Chips:  100,
+		Active: true,
 	}
 }
 
-// Reset resets the hand and the bet
-func (player *basePlayer) Reset() {
-	player.Hands = []*cards.Hand{cards.NewHand()}
-	player.ActiveHand = 0
+// STEP 1: Bet -------------------------------------------------------------------------------------
+
+func (player *basePlayer) bet(bet int) int {
+	player.Chips -= bet
+	return bet
 }
 
-// Hand string calls the stringify function on the player's hand
-func (player *basePlayer) HandString() string {
-	return player.Hands[player.ActiveHand].Stringify()
-}
+// STEP 2: Deal ------------------------------------------------------------------------------------
 
 // Deal adds a card to the player's hand
-func (player *basePlayer) Deal(card *cards.Card) {
-	player.Hands[player.ActiveHand].Add(card)
+func (player *basePlayer) Deal(handIdx int, card *cards.Card) {
+	player.Hands[handIdx].Add(card)
 }
 
-func (player *basePlayer) split() {
-	splitHand := player.Hands[player.ActiveHand].Split()
+// STEP 3: Turn ------------------------------------------------------------------------------------
+
+func (player *basePlayer) split(handIdx int) {
+	splitHand := player.Hands[handIdx].Split()
 	player.Hands = append(player.Hands, splitHand)
+}
+
+// STEP 4: Payout ----------------------------------------------------------------------------------
+
+func (player *basePlayer) Payout(dealerHand *cards.Hand) {
+	for i, hand := range player.Hands {
+		result := hand.Result(dealerHand)
+		player.payout(i, result)
+	}
 }
 
 func (player *basePlayer) payout(handIdx int, result string) {
@@ -60,4 +75,38 @@ func (player *basePlayer) payout(handIdx int, result string) {
 		player.Chips += wager
 	case "BUST", "LOSE":
 	}
+}
+
+// STEP 5: Reset -----------------------------------------------------------------------------------
+
+func (player *basePlayer) Reset() {
+	player.Hands = []*cards.Hand{cards.NewHand()}
+}
+
+// STEP 6: Leave -----------------------------------------------------------------------------------
+
+func (player *HumanPlayer) LeaveSeat() {
+	player.Active = false
+}
+
+// HELPERS -----------------------------------------------------------------------------------------
+
+// Hands
+func (player *basePlayer) GetHands() []*cards.Hand {
+	return player.Hands
+}
+
+// IsActive
+func (player *basePlayer) IsActive() bool {
+	return player.Active
+}
+
+// HandString calls the stringify function on the player's hand
+func (player *basePlayer) HandString(handIdx int) string {
+	return player.Hands[handIdx].Stringify()
+}
+
+// IsTurnOver returns true when the turn is over
+func (player *basePlayer) IsTurnOver(handIdx int) bool {
+	return player.Hands[handIdx].DidBust() || player.Hands[handIdx].Is21()
 }
