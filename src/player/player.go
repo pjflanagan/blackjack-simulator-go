@@ -19,7 +19,8 @@ type Player interface {
 	Hit(handIdx int, card *cards.Card) bool
 	Split(handIdx int)
 	DoubleDown(handIdx int, card *cards.Card)
-	Stay(handIDx int)
+	Stay(handIdx int)
+	Bust(handIdx int)
 	// Payout
 	Payout(dealerHand *cards.Hand)
 	// Reset
@@ -35,6 +36,7 @@ type basePlayer struct {
 	Hands  []*cards.Hand
 	Chips  int
 	Status int
+	child  Player
 }
 
 func initBasePlayer(name string) basePlayer {
@@ -86,7 +88,8 @@ func (player *basePlayer) hit(handIdx int, card *cards.Card) bool {
 	player.Deal(handIdx, card)
 	if player.Hands[handIdx].DidBust() {
 		// if they bust then determine if turn is really over
-		return player.bust(handIdx)
+		player.child.Bust(handIdx)
+		return false
 	} else if player.Hands[handIdx].Is21() {
 		// if they hit 21 then this hand is over
 		player.stay(handIdx)
@@ -127,14 +130,13 @@ func (player *basePlayer) doubleDown(handIdx int, card *cards.Card) {
 }
 
 // Returns true if the player's hand is still active
-func (player *basePlayer) bust(handIdx int) bool {
+func (player *basePlayer) bust(handIdx int) {
+	player.payout(0, c.RESULT_BUST)
 	if handIdx == len(player.Hands)-1 {
-		player.payout(0, c.RESULT_BUST)
 		player.Status = c.PLAYER_BUST
-		return false
+	} else {
+		player.Status = c.PLAYER_JEPORADY
 	}
-	player.Status = c.PLAYER_JEPORADY
-	return true
 }
 
 // Returns true if the player's turn is still active

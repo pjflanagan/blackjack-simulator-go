@@ -16,9 +16,11 @@ type HumanPlayer struct {
 
 // NewHumanPlayer returns a new human player with name You
 func NewHumanPlayer() *HumanPlayer {
-	return &HumanPlayer{
+	humanPlayer := &HumanPlayer{
 		basePlayer: initBasePlayer("You"),
 	}
+	humanPlayer.basePlayer.child = humanPlayer
+	return humanPlayer
 }
 
 // STEP 1: Bet -------------------------------------------------------------------------------------
@@ -102,15 +104,15 @@ func (player *HumanPlayer) DoubleDown(handIdx int, card *cards.Card) {
 	player.doubleDown(handIdx, card)
 }
 
-// Bust returns true if the player's turn is still active
-func (player *HumanPlayer) Bust(handIdx int) bool {
+// Bust busts the players hand and sets the status
+func (player *HumanPlayer) Bust(handIdx int) {
 	fmt.Printf("%s bust and lose %d.\n", player.Name, player.Hands[handIdx].Wager)
-	return player.bust(handIdx)
+	player.bust(handIdx)
 }
 
 // Stay returns true if the player's turn is still active
 func (player *HumanPlayer) Stay(handIdx int) {
-	fmt.Printf("%s stays.\n", player.Name)
+	fmt.Printf("%s stay.\n", player.Name)
 	player.stay(handIdx)
 }
 
