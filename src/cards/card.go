@@ -5,26 +5,24 @@ import (
 )
 
 const (
-	ACE_VALUE = 11
+	ACE_VALUE  = 11
+	FACE_VALUE = 10
 )
 
 // Card represents a playing card
 type Card struct {
-	// Face is integer that represents the face value in FaceMap
-	Face int
-	// Cardinality is integer that represents the cardinality in CardinalityMap
-	Cardinality int
-	// FaceDown is bool representing if the card is facing down
-	FaceDown bool
-	// Do not store value in the card, the card's value depends on the situation
+	// Face is int that represents the face of the card (not the value)
+	Face        int
+	cardinality int
+	faceDown    bool
 }
 
 // NewCard returns a pointer to a new card
 func NewCard(face int, cardinality int) *Card {
 	return &Card{
 		Face:        face,
-		Cardinality: cardinality,
-		FaceDown:    false,
+		cardinality: cardinality,
+		faceDown:    false,
 	}
 }
 
@@ -40,9 +38,9 @@ var valueMap = map[int]int{
 	8:  8,
 	9:  9,
 	10: 10,
-	11: 10,
-	12: 10,
-	13: 10,
+	11: FACE_VALUE,
+	12: FACE_VALUE,
+	13: FACE_VALUE,
 }
 
 // Value returns the value of the card
@@ -54,12 +52,22 @@ func (card *Card) Value() int {
 
 // FlipDown turns a card face down
 func (card *Card) FlipDown() {
-	card.FaceDown = true
+	card.faceDown = true
+}
+
+// IsFaceDown returns true when face is down
+func (card *Card) IsFaceDown() bool {
+	return card.faceDown
 }
 
 // FlipUp turns a card face up
 func (card *Card) FlipUp() {
-	card.FaceDown = false
+	card.faceDown = false
+}
+
+// IsFaceUp returns true when face is up
+func (card *Card) IsFaceUp() bool {
+	return !card.faceDown
 }
 
 // faceMap maps integers to face strings
@@ -79,6 +87,11 @@ var faceMap = map[int]string{
 	13: "K",
 }
 
+// FaceName returns the name version of the face
+func (card *Card) FaceName() string {
+	return faceMap[card.Face]
+}
+
 // cardinalitySymbolMap maps integers to a character
 var cardinalitySymbolMap = map[int]string{
 	1: "♠",
@@ -89,12 +102,12 @@ var cardinalitySymbolMap = map[int]string{
 
 // Stringify returns a string with just the value and cardinality symbol
 func (card *Card) Stringify() string {
-	return fmt.Sprintf("%s%s", faceMap[card.Face], cardinalitySymbolMap[card.Cardinality])
+	return fmt.Sprintf("%s%s", faceMap[card.Face], cardinalitySymbolMap[card.cardinality])
 }
 
 // CardReadyStrings returns cardinality, first face, last face
 func (card *Card) CardReadyStrings() (string, string, string) {
-	cardinality := cardinalitySymbolMap[card.Cardinality]
+	cardinality := cardinalitySymbolMap[card.cardinality]
 	face := faceMap[card.Face]
 	if len(face) == 2 {
 		return cardinality, face, face

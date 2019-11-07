@@ -6,7 +6,8 @@ results in hopes of learning the best possible moves.
 
 ## To Do
 
-- Refactor exported and unexported properties
-- Reorganize the base player
-- Use player status in more clear way
-- Reorganize the table to be more clear
+- [ ] Validation for a player's move, right now they can split and double down whenever
+- [ ] Better print statement organization, print a player's sum like: "Rainman has soft 16."
+- [ ] Refactor exported and unexported properties
+- [ ] Reorganize the base player, use player status in more clear way
+- [ ] Reorganize the table to be more clear

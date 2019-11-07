@@ -29,10 +29,10 @@ func (dealer *Dealer) Deal(card *cards.Card) {
 
 // Move returns a string representing the dealer's move
 func (dealer *Dealer) Move() string {
-	value, soft := dealer.Hand.Value()
+	value, handType := dealer.Hand.Value()
 	if value < 17 {
 		return "HIT"
-	} else if value == 17 && soft && HIT_ON_SOFT_17 {
+	} else if value == 17 && handType == "SOFT" && HIT_ON_SOFT_17 {
 		return "HIT"
 	}
 	return "STAY"

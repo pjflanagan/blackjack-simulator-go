@@ -8,10 +8,12 @@ import (
 	"strings"
 )
 
+// HumanPlayer extends basePlayer
 type HumanPlayer struct {
 	basePlayer
 }
 
+// NewHumanPlayer returns a new human player with name You
 func NewHumanPlayer() *HumanPlayer {
 	return &HumanPlayer{
 		basePlayer: initBasePlayer("You"),
@@ -20,10 +22,12 @@ func NewHumanPlayer() *HumanPlayer {
 
 // STEP 1: Bet -------------------------------------------------------------------------------------
 
+// CanBet returns true when a player can bet
 func (player *HumanPlayer) CanBet(minBet int) bool {
 	return player.Chips > minBet && player.Status == "READY"
 }
 
+// Bet prompts a player to bet
 func (player *HumanPlayer) Bet(minBet int, count int) {
 	var bet int
 	fmt.Printf("Place bet, you have %d chips [bet 0 to leave table]: ", player.Chips)
@@ -45,8 +49,16 @@ func (player *HumanPlayer) Bet(minBet int, count int) {
 	return
 }
 
+// Blackjack handles when a player hits blackjack
+func (player *HumanPlayer) Blackjack() {
+	fmt.Printf("%s hit blackjack!\n", player.Name)
+	player.printHumanHand(0)
+	player.blackjack()
+}
+
 // STEP 3: Move ------------------------------------------------------------------------------------
 
+// Move returns string representing the move
 func (player *HumanPlayer) Move(handIdx int) string {
 	player.printHumanHand(handIdx)
 	reader := bufio.NewReader(os.Stdin)
@@ -71,24 +83,59 @@ func (player *HumanPlayer) Move(handIdx int) string {
 	}
 }
 
+// Hit returns true if hand is still active
+func (player *HumanPlayer) Hit(handIdx int, card *cards.Card) bool {
+	fmt.Printf("%s received %s.\n", player.Name, card.Stringify())
+	return player.hit(handIdx, card)
+}
+
+// Split splits the player's hand
+func (player *HumanPlayer) Split(handIdx int) {
+	fmt.Printf("%s split.\n", player.Name)
+	player.split(handIdx)
+}
+
+// DoubleDown doubles down
+func (player *HumanPlayer) DoubleDown(handIdx int, card *cards.Card) {
+	fmt.Printf("%s double down and receive %s.\n", player.Name, card.Stringify())
+	player.doubleDown(handIdx, card)
+}
+
+// Bust returns true if the player's turn is still active
+func (player *HumanPlayer) Bust(handIdx int) bool {
+	fmt.Printf("%s bust and lose %d.\n", player.Name, player.Hands[handIdx].Wager)
+	return player.bust(handIdx)
+}
+
+// Stay returns true if the player's turn is still active
+func (player *HumanPlayer) Stay(handIdx int) {
+	fmt.Printf("%s stays.\n", player.Name)
+	player.stay(handIdx)
+}
+
 // STEP 4: Payout ----------------------------------------------------------------------------------
 
+// Payout print's message hand handles the payout
 func (player *HumanPlayer) Payout(dealerHand *cards.Hand) {
 	for i, hand := range player.Hands {
 		result := hand.Result(dealerHand)
-		player.payout(i, result)
 
 		switch result {
 		case "BLACKJACK":
-			fmt.Printf("You have a blackjack!\n")
+			// do not call payout for blackjack, money has already been given
+			fmt.Printf("You had a blackjack!\n")
 		case "WIN":
 			fmt.Printf("You won!\n")
+			player.payout(i, result)
 		case "PUSH":
 			fmt.Printf("You push.\n")
+			player.payout(i, result)
 		case "BUST":
-			fmt.Printf("You bust.\n")
+			// do not call payout for bust, money has already been taken
+			fmt.Printf("You busted.\n")
 		case "LOSE":
 			fmt.Printf("You lose.\n")
+			player.payout(i, result)
 		}
 	}
 }
@@ -97,5 +144,6 @@ func (player *HumanPlayer) Payout(dealerHand *cards.Hand) {
 
 func (player *HumanPlayer) printHumanHand(handIdx int) {
 	fmt.Printf("====== YOUR HAND ======\n")
-	fmt.Printf("%s\n", player.HandString(handIdx))
+	fmt.Printf("You have a %s.\n", player.Hands[handIdx].ShorthandSumString())
+	fmt.Printf("%s\n", player.Hands[handIdx].LongformString())
 }

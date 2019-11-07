@@ -26,7 +26,7 @@ func TestIsBlackjack(t *testing.T) {
 				Face: 12,
 			},
 		},
-		HasBeenSplit: false,
+		hasBeenSplit: false,
 	}
 
 	splitHand := &Hand{
@@ -38,7 +38,7 @@ func TestIsBlackjack(t *testing.T) {
 				Face: 12,
 			},
 		},
-		HasBeenSplit: true,
+		hasBeenSplit: true,
 	}
 
 	notBlackjackHand := &Hand{
@@ -50,7 +50,7 @@ func TestIsBlackjack(t *testing.T) {
 				Face: 4,
 			},
 		},
-		HasBeenSplit: false,
+		hasBeenSplit: false,
 	}
 
 	threeCardHand := &Hand{
@@ -66,7 +66,7 @@ func TestIsBlackjack(t *testing.T) {
 				Face: 10,
 			},
 		},
-		HasBeenSplit: false,
+		hasBeenSplit: false,
 	}
 
 	var testCases = isBlackjackTest{

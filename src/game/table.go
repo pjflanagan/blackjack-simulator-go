@@ -124,7 +124,8 @@ func (table *Table) playerTurn(player player.Player, handIdx int) {
 			handIsActive = true
 		case "STAY":
 			// have the player stay, conditional end
-			handIsActive = player.Stay(handIdx)
+			player.Stay(handIdx)
+			handIsActive = false
 		default:
 			// shouldn't happen
 		}
@@ -191,6 +192,7 @@ func (table *Table) Reset() {
 
 // HELPERS -----------------------------------------------------------------------------------------
 
+// hasPlayerOfStatus returns true when one player's status matches the status
 func (table *Table) hasPlayerOfStatus(status string) bool {
 	for _, player := range table.Players {
 		if player.StatusIs(status) {
@@ -203,15 +205,19 @@ func (table *Table) hasPlayerOfStatus(status string) bool {
 func (table *Table) takeCard(up bool) (card *cards.Card) {
 	card = table.Shoe.Take()
 	if up {
+		// ensure the card is face up then see the card (count the card)
+		card.FlipUp()
 		table.seeCard(card)
-	} else {
-		card.FlipDown()
+		return
 	}
+	// otherwise flip it down
+	card.FlipDown()
 	return
 }
 
 func (table *Table) seeCard(card *cards.Card) {
-	if card.FaceDown {
+	if card.IsFaceDown() {
+		// if the card is face down then don't add it to the count
 		return
 	}
 	value := card.Value()
