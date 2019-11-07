@@ -46,6 +46,7 @@ func (shoe *Shoe) Shuffle() {
 	perm := rand.Perm(len(allCards))
 	for i, v := range perm {
 		shoe.Deck[v] = allCards[i]
+		shoe.Deck[v].FlipUp()
 	}
 	shoe.cut()
 	shoe.setReshuffleMarker()

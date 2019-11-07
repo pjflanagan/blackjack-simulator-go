@@ -19,9 +19,11 @@ func NewGame(minBet int, deckCount int) *Game {
 }
 
 // AddPlayer adds a new player to the game
-func (game *Game) AddPlayer() {
-	game.Table.TakeSeat(player.NewHumanPlayer())
-	game.Table.HasHuman(true)
+func (game *Game) AddPlayer(playerType string) {
+	switch playerType {
+	case "HUMAN":
+		game.Table.TakeSeat(player.NewHumanPlayer(), true)
+	}
 }
 
 // Play is the main game loop
