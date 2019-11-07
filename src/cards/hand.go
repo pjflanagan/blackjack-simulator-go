@@ -23,6 +23,7 @@ func (hand *Hand) Add(card *Card) {
 
 // Split returns a second hand
 func (hand *Hand) Split() (splitHand *Hand) {
+	splitHand = new(Hand)
 	splitHand.Cards = []*Card{hand.Cards[1]}
 	splitHand.HasBeenSplit = true
 	splitHand.Wager = hand.Wager
@@ -66,6 +67,11 @@ func (hand *Hand) DidBust() bool {
 func (hand *Hand) Is21() bool {
 	value, _ := hand.Value()
 	return value == 21
+}
+
+func (hand *Hand) IsBlackjack() bool {
+	value, _ := hand.Value()
+	return value == 21 && len(hand.Cards) == 2 && !hand.HasBeenSplit
 }
 
 func (hand *Hand) Result(dealerHand *Hand) string {

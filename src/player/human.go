@@ -14,32 +14,35 @@ type HumanPlayer struct {
 
 func NewHumanPlayer() *HumanPlayer {
 	return &HumanPlayer{
-		basePlayer: initBasePlayer(),
+		basePlayer: initBasePlayer("You"),
 	}
 }
 
 // STEP 1: Bet -------------------------------------------------------------------------------------
 
 func (player *HumanPlayer) CanBet(minBet int) bool {
-	return player.Chips > minBet && player.Active
+	return player.Chips > minBet && player.Status == "READY"
 }
 
-func (player *HumanPlayer) Bet(minBet int, count int) int {
+func (player *HumanPlayer) Bet(minBet int, count int) {
 	var bet int
 	fmt.Printf("Place bet, you have %d chips [bet 0 to leave table]: ", player.Chips)
 	_, _ = fmt.Scanf("%d", &bet)
 
 	if bet == 0 {
 		player.LeaveSeat()
-		return 0
+		return
 	} else if bet < 15 {
 		fmt.Printf("Bet (%d) is too low sir. ", bet)
-		return player.Bet(minBet, count)
+		player.Bet(minBet, count)
+		return
 	} else if bet > player.Chips {
 		fmt.Printf("Bet (%d) is more than what you have sir. ", bet)
-		return player.Bet(minBet, count)
+		player.Bet(minBet, count)
+		return
 	}
-	return player.bet(bet)
+	player.bet(0, bet)
+	return
 }
 
 // STEP 3: Move ------------------------------------------------------------------------------------
@@ -57,25 +60,15 @@ func (player *HumanPlayer) Move(handIdx int) string {
 	case "h":
 		return "HIT"
 	case "s":
-		return "STAND"
+		return "STAY"
+	case "d":
+		return "DOUBLE"
+	case "p":
+		return "SPLIT"
 	default:
 		fmt.Printf("Move (%s) is invalid pick again.\n", move)
 		return player.Move(handIdx)
 	}
-}
-
-// IsTurnOver returns true when the turn is over
-func (player *HumanPlayer) IsTurnOver(handIdx int) bool {
-	if player.Hands[handIdx].DidBust() {
-		player.printHumanHand(handIdx)
-		fmt.Printf("You busted!\n")
-		return true
-	} else if player.Hands[handIdx].Is21() {
-		player.printHumanHand(handIdx)
-		fmt.Printf("21! Winner, winner, chicken dinner!\n")
-		return true
-	}
-	return false
 }
 
 // STEP 4: Payout ----------------------------------------------------------------------------------
@@ -84,6 +77,19 @@ func (player *HumanPlayer) Payout(dealerHand *cards.Hand) {
 	for i, hand := range player.Hands {
 		result := hand.Result(dealerHand)
 		player.payout(i, result)
+
+		switch result {
+		case "BLACKJACK":
+			fmt.Printf("You have a blackjack!\n")
+		case "WIN":
+			fmt.Printf("You won!\n")
+		case "PUSH":
+			fmt.Printf("You push.\n")
+		case "BUST":
+			fmt.Printf("You bust.\n")
+		case "LOSE":
+			fmt.Printf("You lose.\n")
+		}
 	}
 }
 

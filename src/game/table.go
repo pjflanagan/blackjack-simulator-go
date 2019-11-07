@@ -3,6 +3,7 @@ package game
 import (
 	"../cards"
 	"../player"
+	"fmt"
 )
 
 const ()
@@ -46,7 +47,7 @@ func (table *Table) TakeBets() (hasActivePlayer bool) {
 	for _, player := range table.Players {
 		if player.CanBet(table.minBet) {
 			player.Bet(table.minBet, table.count)
-			if player.IsActive() {
+			if player.GetStatus() == "ANTED" {
 				// if they leave the table while they bet then keep active player false
 				hasActivePlayer = true
 			}
@@ -67,10 +68,13 @@ func (table *Table) Deal() {
 	for pass := 0; pass < 2; pass++ {
 		// make two passes for the deal
 		for _, player := range table.Players {
-			if player.IsActive() {
+			if player.GetStatus() == "ANTED" || player.GetStatus() == "JEPORADY" {
 				// deal each player in order
 				card := table.takeCard(true)
 				player.Deal(0, card)
+				if pass == 1 && player.IsBlackjack() {
+					player.Blackjack()
+				}
 			}
 		}
 		// deal the dealer after the players, if it is the first pass keep if face down
@@ -84,46 +88,58 @@ func (table *Table) Deal() {
 // TakeTurns makes everyone take turns
 func (table *Table) TakeTurns() {
 	table.Dealer.PrintHand(table.hasHuman)
-	var hasNonBustPlayer bool
 	for _, player := range table.Players {
-		if player.IsActive() {
-			didBust := table.playerTurn(player)
-			if !didBust {
-				hasNonBustPlayer = true
-			}
+		if player.GetStatus() == "JEPORADY" {
+			table.playerTurn(player, 0)
 		}
 	}
-	if hasNonBustPlayer {
+	if table.hasActivePlayer() {
 		table.dealerTurn()
 	}
 }
 
-func (table *Table) playerTurn(player player.Player) (hasNonBustHand bool) {
-	for handIdx := range player.GetHands() {
-		activeTurn := true
-		for activeTurn {
-			move := player.Move(handIdx)
-			activeTurn = table.handleMove(player, handIdx, move)
-		}
+func (table *Table) playerTurn(player player.Player, handIdx int) {
+	handIsActive := true
+	for handIsActive {
+		move := player.Move(handIdx)
+		handIsActive = table.handleMove(player, handIdx, move)
 	}
-	return
+	if handIdx < len(player.GetHands())-1 {
+		table.playerTurn(player, handIdx+1)
+	}
 }
 
+// handleMove returns true when turn is still active
 func (table *Table) handleMove(player player.Player, handIdx int, move string) bool {
 	switch move {
 	case "HIT":
+		// take a card out and give it to the player
 		card := table.takeCard(true)
-		player.Deal(handIdx, card)
-		return !player.IsTurnOver(handIdx)
+		return player.Hit(handIdx, card)
 	case "DOUBLE":
-		// player.DoubleDownHand(handIdx)
 		card := table.takeCard(true)
-		player.Deal(handIdx, card)
+		player.DoubleDown(handIdx, card)
 		return false
 	case "SPLIT":
+		player.Split(handIdx)
+		card1 := table.takeCard(true)
+		card2 := table.takeCard(true)
+		player.Hit(handIdx, card1)
+		player.Hit(handIdx+1, card2)
 		return true
 	case "STAY":
+		player.Stay(handIdx)
 		return false
+	}
+	player.Stay(handIdx)
+	return false
+}
+
+func (table *Table) hasActivePlayer() bool {
+	for _, player := range table.Players {
+		if player.GetStatus() == "STAY" {
+			return true
+		}
 	}
 	return false
 }
@@ -131,11 +147,13 @@ func (table *Table) handleMove(player player.Player, handIdx int, move string) b
 func (table *Table) dealerTurn() {
 	revealCard := table.Dealer.RevealCard()
 	table.seeCard(revealCard)
+	fmt.Printf("Dealer reveals %s. \n", revealCard.Stringify())
 	activeTurn := true
 	for activeTurn {
 		move := table.Dealer.Move()
 		activeTurn = table.handleDealerMove(move)
 	}
+	table.Dealer.PrintHand(table.hasHuman)
 }
 
 func (table *Table) handleDealerMove(move string) bool {
@@ -143,8 +161,10 @@ func (table *Table) handleDealerMove(move string) bool {
 	case "HIT":
 		card := table.takeCard(true)
 		table.Dealer.Hand.Add(card)
+		fmt.Printf("Dealer hits and receives %s.\n", card.Stringify())
 		return !table.Dealer.Hand.DidBust()
 	case "STAY":
+		fmt.Printf("Dealer stays.\n")
 		return false
 	}
 	return false
@@ -155,7 +175,7 @@ func (table *Table) handleDealerMove(move string) bool {
 // Payout determines the winnings for each player
 func (table *Table) Payout() {
 	for _, player := range table.Players {
-		if player.IsActive() {
+		if player.GetStatus() == "STAY" {
 			player.Payout(table.Dealer.Hand)
 		}
 	}
@@ -166,8 +186,8 @@ func (table *Table) Payout() {
 // Reset resets the table
 func (table *Table) Reset() {
 	for _, player := range table.Players {
-		if player.IsActive() {
-			player.Reset()
+		if player.GetStatus() != "OUT" {
+			player.Reset(table.minBet)
 		}
 	}
 	if table.Shoe.NeedsShuffle() {
