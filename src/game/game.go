@@ -1,6 +1,7 @@
 package game
 
 import (
+	c "../constant"
 	"../player"
 )
 
@@ -19,9 +20,9 @@ func NewGame(minBet int, deckCount int) *Game {
 }
 
 // AddPlayer adds a new player to the game
-func (game *Game) AddPlayer(playerType string) {
+func (game *Game) AddPlayer(playerType int) {
 	switch playerType {
-	case "HUMAN":
+	case c.TYPE_HUMAN:
 		game.Table.TakeSeat(player.NewHumanPlayer(), true)
 	}
 }

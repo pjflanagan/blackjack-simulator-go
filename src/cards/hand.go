@@ -1,6 +1,7 @@
 package cards
 
 import (
+	c "../constant"
 	"fmt"
 )
 
@@ -44,7 +45,7 @@ func (hand *Hand) RevealCard() *Card {
 
 // Value returns the value of the hand and accounts for aces
 // if there is an ace it returns the higher value and if it is soft
-func (hand *Hand) Value() (int, string) {
+func (hand *Hand) Value() (int, int) {
 	var aceCount int
 	var sum int
 	for _, card := range hand.Cards {
@@ -57,11 +58,11 @@ func (hand *Hand) Value() (int, string) {
 		sum += cardValue
 	}
 	if hand.isPair() {
-		return sum, "PAIR"
+		return sum, c.HAND_PAIR
 	} else if value, isSoft := accountForAces(sum, aceCount); isSoft {
-		return value, "SOFT"
+		return value, c.HAND_SOFT
 	} else {
-		return value, "HARD"
+		return value, c.HAND_HARD
 	}
 }
 
@@ -110,22 +111,22 @@ func (hand *Hand) isBlackjack(value int) bool {
 
 // Result looks at the player and dealer's hand and returns the string representing the result
 // this should realy only be called when a player has STAYed and will only return WIN, PUSH, LOSE
-func (hand *Hand) Result(dealerHand *Hand) string {
+func (hand *Hand) Result(dealerHand *Hand) int {
 	playerHandValue, _ := hand.Value()
 	dealerHandValue, _ := dealerHand.Value()
 	switch {
 	case didBust(playerHandValue):
-		return "BUST"
+		return c.RESULT_BUST
 	case hand.isBlackjack(playerHandValue):
-		return "BLACKJACK"
+		return c.RESULT_BLACKJACK
 	case didBust(dealerHandValue):
-		return "WIN"
+		return c.RESULT_WIN
 	case playerHandValue == dealerHandValue:
-		return "PUSH"
+		return c.RESULT_PUSH
 	case playerHandValue > dealerHandValue:
-		return "WIN"
+		return c.RESULT_WIN
 	}
-	return "LOSE"
+	return c.RESULT_LOSE
 }
 
 // OUTPUT ------------------------------------------------------------------------------------------
@@ -135,9 +136,9 @@ func (hand *Hand) ShorthandSumString() (str string) {
 	value, handType := hand.Value()
 	if hand.isBlackjack(value) {
 		return "blackjack"
-	} else if handType == "PAIR" {
+	} else if handType == c.HAND_PAIR {
 		return fmt.Sprintf("pair of %s's", hand.Cards[0].FaceName())
-	} else if handType == "SOFT" {
+	} else if handType == c.HAND_SOFT {
 		return fmt.Sprintf("soft %d", value)
 	}
 	return fmt.Sprintf("hard %d", value)

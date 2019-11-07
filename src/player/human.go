@@ -2,6 +2,7 @@ package player
 
 import (
 	"../cards"
+	c "../constant"
 	"bufio"
 	"fmt"
 	"os"
@@ -24,7 +25,7 @@ func NewHumanPlayer() *HumanPlayer {
 
 // CanBet returns true when a player can bet
 func (player *HumanPlayer) CanBet(minBet int) bool {
-	return player.Chips > minBet && player.Status == "READY"
+	return player.Chips > minBet && player.Status == c.PLAYER_READY
 }
 
 // Bet prompts a player to bet
@@ -59,7 +60,7 @@ func (player *HumanPlayer) Blackjack() {
 // STEP 3: Move ------------------------------------------------------------------------------------
 
 // Move returns string representing the move
-func (player *HumanPlayer) Move(handIdx int) string {
+func (player *HumanPlayer) Move(handIdx int) int {
 	player.printHumanHand(handIdx)
 	reader := bufio.NewReader(os.Stdin)
 	var move string
@@ -70,13 +71,13 @@ func (player *HumanPlayer) Move(handIdx int) string {
 
 	switch move {
 	case "h":
-		return "HIT"
+		return c.MOVE_HIT
 	case "s":
-		return "STAY"
+		return c.MOVE_STAY
 	case "d":
-		return "DOUBLE"
+		return c.MOVE_DOUBLE
 	case "p":
-		return "SPLIT"
+		return c.MOVE_SPLIT
 	default:
 		fmt.Printf("Move (%s) is invalid pick again.\n", move)
 		return player.Move(handIdx)
@@ -121,19 +122,19 @@ func (player *HumanPlayer) Payout(dealerHand *cards.Hand) {
 		result := hand.Result(dealerHand)
 
 		switch result {
-		case "BLACKJACK":
+		case c.RESULT_BLACKJACK:
 			// do not call payout for blackjack, money has already been given
 			fmt.Printf("You had a blackjack!\n")
-		case "WIN":
+		case c.RESULT_WIN:
 			fmt.Printf("You won!\n")
 			player.payout(i, result)
-		case "PUSH":
+		case c.RESULT_PUSH:
 			fmt.Printf("You push.\n")
 			player.payout(i, result)
-		case "BUST":
+		case c.RESULT_BUST:
 			// do not call payout for bust, money has already been taken
 			fmt.Printf("You busted.\n")
-		case "LOSE":
+		case c.RESULT_LOSE:
 			fmt.Printf("You lose.\n")
 			player.payout(i, result)
 		}

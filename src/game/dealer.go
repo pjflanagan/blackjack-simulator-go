@@ -2,6 +2,7 @@ package game
 
 import (
 	"../cards"
+	c "../constant"
 	"fmt"
 )
 
@@ -28,14 +29,14 @@ func (dealer *Dealer) Deal(card *cards.Card) {
 }
 
 // Move returns a string representing the dealer's move
-func (dealer *Dealer) Move() string {
+func (dealer *Dealer) Move() int {
 	value, handType := dealer.Hand.Value()
 	if value < 17 {
-		return "HIT"
-	} else if value == 17 && handType == "SOFT" && HIT_ON_SOFT_17 {
-		return "HIT"
+		return c.MOVE_HIT
+	} else if value == 17 && handType == c.HAND_SOFT && HIT_ON_SOFT_17 {
+		return c.MOVE_HIT
 	}
-	return "STAY"
+	return c.MOVE_STAY
 }
 
 // DidBust returns true if the dealer has bust

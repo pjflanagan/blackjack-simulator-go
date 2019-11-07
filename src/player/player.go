@@ -2,6 +2,7 @@ package player
 
 import (
 	"../cards"
+	c "../constant"
 )
 
 // Player is the base class for all players (excluding dealer)
@@ -13,7 +14,7 @@ type Player interface {
 	IsBlackjack() bool
 	Blackjack()
 	// Move
-	Move(handIdx int) string
+	Move(handIdx int) int
 	Deal(handIdx int, card *cards.Card)
 	Hit(handIdx int, card *cards.Card) bool
 	Split(handIdx int)
@@ -26,15 +27,14 @@ type Player interface {
 	LeaveSeat()
 	// Helpers
 	GetHands() []*cards.Hand
-	StatusIs(statuses ...string) bool
+	StatusIs(statuses ...int) bool
 }
 
 type basePlayer struct {
-	Name  string
-	Hands []*cards.Hand
-	Chips int
-	// Status in order READY ANTED JEPORADY (BLACKJACK BUST STAY) OUT
-	Status string
+	Name   string
+	Hands  []*cards.Hand
+	Chips  int
+	Status int
 }
 
 func initBasePlayer(name string) basePlayer {
@@ -42,19 +42,19 @@ func initBasePlayer(name string) basePlayer {
 		Name:   name,
 		Hands:  []*cards.Hand{cards.NewHand()},
 		Chips:  100,
-		Status: "READY",
+		Status: c.PLAYER_READY,
 	}
 }
 
 // STEP 1: Bet -------------------------------------------------------------------------------------
 
 func (player *basePlayer) bet(handIdx int, bet int) {
-	if player.Status == "LEFT" {
+	if player.Status == c.PLAYER_OUT {
 		return
 	}
 	player.Chips -= bet
 	player.Hands[handIdx].Wager = bet
-	player.Status = "ANTED"
+	player.Status = c.PLAYER_ANTED
 }
 
 // STEP 2: Deal ------------------------------------------------------------------------------------
@@ -62,7 +62,7 @@ func (player *basePlayer) bet(handIdx int, bet int) {
 // Deal adds a card to the player's hand
 func (player *basePlayer) Deal(handIdx int, card *cards.Card) {
 	player.Hands[handIdx].Add(card)
-	player.Status = "JEPORADY"
+	player.Status = c.PLAYER_JEPORADY
 }
 
 // IsBlackjack returns true when player gets a blackjack
@@ -71,8 +71,8 @@ func (player *basePlayer) IsBlackjack() bool {
 }
 
 func (player *basePlayer) blackjack() {
-	player.payout(0, "BLACKJACK")
-	player.Status = "BLACKJACK"
+	player.payout(0, c.RESULT_BLACKJACK)
+	player.Status = c.PLAYER_BLACKJACK
 }
 
 // STEP 3: Turn ------------------------------------------------------------------------------------
@@ -92,7 +92,7 @@ func (player *basePlayer) hit(handIdx int, card *cards.Card) bool {
 		player.stay(handIdx)
 		return false
 	}
-	// turn is still active, status is "JEPORADY"
+	// turn is still active, status is JEPORADY
 	return true
 }
 
@@ -112,7 +112,7 @@ func (player *basePlayer) split(handIdx int) {
 		player.Hands[handIdx+1] = splitHand
 	}
 
-	player.Status = "JEPORADY"
+	player.Status = c.PLAYER_JEPORADY
 }
 
 func (player *basePlayer) doubleDown(handIdx int, card *cards.Card) {
@@ -129,36 +129,36 @@ func (player *basePlayer) doubleDown(handIdx int, card *cards.Card) {
 // Returns true if the player's hand is still active
 func (player *basePlayer) bust(handIdx int) bool {
 	if handIdx == len(player.Hands)-1 {
-		player.payout(0, "BUST")
-		player.Status = "BUST"
+		player.payout(0, c.RESULT_BUST)
+		player.Status = c.PLAYER_BUST
 		return false
 	}
-	player.Status = "JEPORADY"
+	player.Status = c.PLAYER_JEPORADY
 	return true
 }
 
 // Returns true if the player's turn is still active
 func (player *basePlayer) stay(handIdx int) {
 	if handIdx == len(player.Hands)-1 {
-		player.Status = "STAY"
+		player.Status = c.PLAYER_STAY
 	} else {
-		player.Status = "JEPORADY"
+		player.Status = c.PLAYER_JEPORADY
 	}
 }
 
 // STEP 4: Payout ----------------------------------------------------------------------------------
 
-func (player *basePlayer) payout(handIdx int, result string) {
+func (player *basePlayer) payout(handIdx int, result int) {
 	wager := player.Hands[handIdx].Wager
 	player.Hands[handIdx].Wager = 0
 	switch result {
-	case "BLACKJACK":
+	case c.RESULT_BLACKJACK:
 		player.Chips += (wager * 3 / 2) + wager
-	case "WIN":
+	case c.RESULT_WIN:
 		player.Chips += wager + wager
-	case "PUSH":
+	case c.RESULT_PUSH:
 		player.Chips += wager
-	case "BUST", "LOSE":
+	case c.RESULT_BUST, c.RESULT_LOSE:
 	}
 }
 
@@ -167,16 +167,16 @@ func (player *basePlayer) payout(handIdx int, result string) {
 func (player *basePlayer) Reset(minBet int) {
 	player.Hands = []*cards.Hand{cards.NewHand()}
 	if player.Chips > minBet {
-		player.Status = "READY"
+		player.Status = c.PLAYER_READY
 	} else {
-		player.Status = "OUT"
+		player.Status = c.PLAYER_OUT
 	}
 }
 
 // STEP 6: Leave -----------------------------------------------------------------------------------
 
 func (player *HumanPlayer) LeaveSeat() {
-	player.Status = "LEFT"
+	player.Status = c.PLAYER_OUT
 }
 
 // HELPERS -----------------------------------------------------------------------------------------
@@ -187,7 +187,7 @@ func (player *basePlayer) GetHands() []*cards.Hand {
 }
 
 // StatusIs returns true if status is one of the strings
-func (player *basePlayer) StatusIs(statuses ...string) bool {
+func (player *basePlayer) StatusIs(statuses ...int) bool {
 	for _, status := range statuses {
 		if status == player.Status {
 			return true
