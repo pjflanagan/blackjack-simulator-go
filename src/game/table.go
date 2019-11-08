@@ -54,12 +54,14 @@ func (table *Table) TakeBets() bool {
 	fmt.Printf("The count is %d.\n", table.count)
 	fmt.Printf("\n == Bet ==\n")
 	for _, player := range table.Players {
-		if player.CanBet(table.minBet) {
-			// if the player can bet then ask them to bet
-			player.Bet(table.minBet, table.count)
-		} else {
-			// if they player can't bet then kick them out
-			player.LeaveSeat()
+		if player.StatusIs(c.PLAYER_READY) {
+			if player.CanBet(table.minBet) {
+				// if the player can bet then ask them to bet
+				player.Bet(table.minBet, table.count)
+			} else {
+				// if they player can't bet then kick them out
+				player.LeaveSeat()
+			}
 		}
 	}
 	return table.hasPlayerOfStatus(c.PLAYER_ANTED)
@@ -129,8 +131,8 @@ func (table *Table) playerTurn(player player.Player, handIdx int) {
 			player.Split(handIdx)
 			card1 := table.takeCard(true)
 			card2 := table.takeCard(true)
-			player.Hit(handIdx, card1)
-			player.Hit(handIdx+1, card2)
+			player.SplitHit(handIdx, card1)
+			player.SplitHit(handIdx+1, card2)
 			handIsActive = true
 		case c.MOVE_STAY:
 			// have the player stay, conditional end

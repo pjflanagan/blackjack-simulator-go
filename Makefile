@@ -13,3 +13,7 @@ test:
 	go test ./src/cards
 	# go test ./src/game
 	# go test ./src/player
+
+clean:
+	reset
+	rm -rf ./out

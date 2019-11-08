@@ -48,6 +48,12 @@ func (hand *Hand) ShowingFace() int {
 	return hand.Cards[0].Face
 }
 
+// ShowingValue the face of the showing hand
+// the first card is the showing one
+func (hand *Hand) ShowingValue() int {
+	return hand.Cards[0].Value()
+}
+
 // VALUE -------------------------------------------------------------------------------------------
 
 // Value returns the value of the hand and accounts for aces
@@ -167,7 +173,9 @@ func (hand *Hand) Result(dealerHand *Hand) int {
 // ShorthandSumString returns the shorthand
 func (hand *Hand) ShorthandSumString() (str string) {
 	value, handType := hand.Value()
-	if hand.isBlackjack(value) {
+	if didBust(value) {
+		return "bust"
+	} else if hand.isBlackjack(value) {
 		return "blackjack"
 	} else if handType == c.HAND_PAIR {
 		return fmt.Sprintf("pair of %s's", hand.Cards[0].FaceName())
@@ -177,6 +185,42 @@ func (hand *Hand) ShorthandSumString() (str string) {
 		return fmt.Sprintf("soft %d", value)
 	}
 	return fmt.Sprintf("hard %d", value)
+}
+
+// ScenarioString returns the shorthand
+func (hand *Hand) ScenarioString() (str string) {
+	value, handType := hand.Value()
+	switch {
+	case is21(value), hand.isBlackjack(value), didBust(value):
+		return ""
+	case handType == c.HAND_PAIR:
+		if value == ACE_VALUE {
+			return "pairA"
+		}
+		return fmt.Sprintf("pair%d", value)
+	case handType == c.HAND_SOFT:
+		return fmt.Sprintf("soft%d", value)
+	case handType == c.HAND_HARD:
+		return fmt.Sprintf("hard%d", value)
+	}
+	return ""
+}
+
+// GetShorthandString gets the shorthand string from a value and a hand
+func GetShorthandString(value int, handType int) string {
+	switch handType {
+	case c.HAND_PAIR:
+		oneCardValue := value / 2
+		if oneCardValue == ACE_VALUE {
+			return "ace pair"
+		}
+		return fmt.Sprintf("%d pair", oneCardValue)
+	case c.HAND_SOFT:
+		return fmt.Sprintf("soft %d", value)
+	case c.HAND_HARD:
+		return fmt.Sprintf("hard %d", value)
+	}
+	return ""
 }
 
 // ShorthandString returns the shorthand

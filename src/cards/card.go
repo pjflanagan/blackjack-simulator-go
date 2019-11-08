@@ -47,7 +47,11 @@ var valueMap = map[int]int{
 // ace is 11 by default and requires additional
 // checking in the Hand package
 func (card *Card) Value() int {
-	return valueMap[card.Face]
+	return GetFaceValue(card.Face)
+}
+
+func GetFaceValue(face int) int {
+	return valueMap[face]
 }
 
 // FlipDown turns a card face down
@@ -89,7 +93,11 @@ var faceMap = map[int]string{
 
 // FaceName returns the name version of the face
 func (card *Card) FaceName() string {
-	return faceMap[card.Face]
+	return GetFaceString(card.Face)
+}
+
+func GetFaceString(face int) string {
+	return faceMap[face]
 }
 
 // cardinalitySymbolMap maps integers to a character

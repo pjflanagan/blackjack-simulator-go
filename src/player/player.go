@@ -17,6 +17,7 @@ type Player interface {
 	// Move
 	Move(handIdx int, dealerHand *cards.Hand) int
 	Hit(handIdx int, card *cards.Card) bool
+	SplitHit(handIdx int, card *cards.Card) bool
 	Split(handIdx int)
 	DoubleDown(handIdx int, card *cards.Card)
 	Stay(handIdx int)
@@ -93,6 +94,12 @@ func (player *basePlayer) validMoves() []string {
 // Hit returns true if hand is still active
 func (player *basePlayer) Hit(handIdx int, card *cards.Card) bool {
 	fmt.Printf("%s hits and receives %s.\n", player.Name, card.Stringify())
+	return player.hit(handIdx, card)
+}
+
+// SplitHit returns true if hand is still active
+func (player *basePlayer) SplitHit(handIdx int, card *cards.Card) bool {
+	fmt.Printf("%s receives %s.\n", player.Name, card.Stringify())
 	return player.hit(handIdx, card)
 }
 
@@ -211,14 +218,14 @@ func (player *basePlayer) resultPayout(handIdx int, result int) {
 	payout := player.payout(handIdx, result)
 	switch result {
 	case c.RESULT_WIN:
-		fmt.Printf("%s won %d chips!\n", player.Name, wager)
+		fmt.Printf("%s beat dealer and wins %d chips!\n", player.Name, wager)
 		player.Chips += payout
 	case c.RESULT_PUSH:
-		fmt.Printf("%s pushes.\n", player.Name)
+		fmt.Printf("%s ties dealer and pushes.\n", player.Name)
 		player.Chips += payout
 	case c.RESULT_LOSE:
 		// do not add payout for lose, money has already been taken
-		fmt.Printf("%s lost %d chips.\n", player.Name, wager)
+		fmt.Printf("%s lost to dealer and loses %d chips.\n", player.Name, wager)
 	case c.RESULT_BLACKJACK:
 		// do not add payout for blackjack, money has already been given
 		fmt.Printf("%s had a blackjack and earned %d chips.\n", player.Name, payout-wager)
@@ -235,14 +242,22 @@ func (player *basePlayer) Reset(minBet int) {
 	if player.Chips > minBet {
 		player.Status = c.PLAYER_READY
 	} else {
-		player.Status = c.PLAYER_OUT
+		player.LeaveSeat()
 	}
 }
 
 // Leave -----------------------------------------------------------------------------------
 
 func (player *basePlayer) LeaveSeat() {
+	fmt.Printf("%s has left with %d chips.\n", player.Name, player.Chips)
 	player.Status = c.PLAYER_OUT
+}
+
+// Summarize -----------------------------------------------------------------------------------
+
+func (player *basePlayer) Summarize() {
+	fmt.Printf("%s has %d chips after _ hands.\n", player.Name, player.Chips)
+	// return Summary{}
 }
 
 // HELPERS -----------------------------------------------------------------------------------------

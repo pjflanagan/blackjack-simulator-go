@@ -26,7 +26,6 @@ const (
 	RESULT_PUSH
 	RESULT_WIN
 	RESULT_LOSE
-	RESULT_CONTINUE // used by learner to record that a hit did not end the turn
 
 	// move status
 	MOVE_HIT

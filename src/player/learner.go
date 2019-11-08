@@ -3,24 +3,32 @@ package player
 import (
 	"../cards"
 	c "../constant"
+	"../utils"
 	"fmt"
 	"math/rand"
+	"os"
+	"time"
 )
 
 const (
-	LEARNER_MAX_PLAYED_HANDS = 500
+	LEARNER_MAX_PLAYED_HANDS = 2000
 )
 
+// TODO: these should maybe be in the card class
 type scenario struct {
-	handValue         int // int representing the value of the hand
-	handType          int // int representing the type of hand the player had (hard, soft, pair)
-	dealerShowingFace int // int representing the face the dealer is showing
-	move              int // int representing the move the player made
+	handString         string // string representing the player's hand
+	dealerShowingValue int    // value of the dealer's upcard
+	move               int    // int representing the move the player made
 }
 
 type results struct {
-	moveCount map[int]int // map of moves to the number of times they happen
-	avgGain   float32
+	resultCount map[int]int // map of result to the number of times they happen
+}
+
+func newResults() *results {
+	return &results{
+		resultCount: make(map[int]int),
+	}
 }
 
 // LearnerPlayer extends basePlayer
@@ -65,8 +73,10 @@ func (player *LearnerPlayer) Move(handIdx int, dealerHand *cards.Hand) (move int
 	fmt.Printf("%s has %s.\n", player.Name, player.Hands[handIdx].ShorthandSumString())
 	validMoves := player.Hands[handIdx].GetValidMoves(100)
 	if len(validMoves) == 0 {
-		// this would happen if a player gets a 21 after a split (but we shouldn't go to here)
+		// this would happen if a player gets a 21 after a split
 		move = c.MOVE_STAY
+	} else if utils.Contains(validMoves, c.MOVE_SPLIT) {
+		move = c.MOVE_SPLIT
 	} else {
 		move = validMoves[rand.Intn(len(validMoves))]
 	}
@@ -75,16 +85,22 @@ func (player *LearnerPlayer) Move(handIdx int, dealerHand *cards.Hand) (move int
 }
 
 func (player *LearnerPlayer) addScenario(handIdx int, dealerHand *cards.Hand, move int) {
-	// TODO: record to player.handMoves
-	handValue, handType := player.Hands[handIdx].Value()
+	scenarioString := player.Hands[handIdx].ScenarioString()
+	if scenarioString == "" {
+		return
+	}
 	s := scenario{
-		handValue:         handValue,
-		handType:          handType,
-		dealerShowingFace: dealerHand.ShowingFace(),
-		move:              move,
+		handString:         scenarioString,
+		dealerShowingValue: dealerHand.ShowingValue(),
+		move:               move,
 	}
 	if player.scenarioResults[s] == nil {
-		player.scenarioResults[s] = new(results)
+		player.scenarioResults[s] = newResults()
+	}
+	if len(player.handMoves) == handIdx {
+		player.handMoves = append(player.handMoves, []int{move})
+	} else {
+		player.handMoves[handIdx] = append(player.handMoves[handIdx], move)
 	}
 }
 
@@ -100,21 +116,60 @@ func (player *LearnerPlayer) Payout(dealerHand *cards.Hand) {
 
 	if player.playedHands > LEARNER_MAX_PLAYED_HANDS {
 		player.LeaveSeat()
+		player.Summarize()
 	}
+
+	// fmt.Printf("\n%+v\n", player.scenarioResultsToCsv())
 }
 
 func (player *LearnerPlayer) addResult(handIdx int, dealerHand *cards.Hand, result int) {
-	// TODO: for each move in play hand
-	// if it isn't the last move then say continue (not sure if this is best bet for split)
-	// if it is the last move then record the result
-	handValue, handType := player.Hands[handIdx].Value()
-	s := scenario{
-		handValue:         handValue,
-		handType:          handType,
-		dealerShowingFace: dealerHand.ShowingFace(),
-		// move:              move,
+	scenarioString := player.Hands[handIdx].ScenarioString()
+	if scenarioString == "" {
+		return
 	}
-	if player.scenarioResults[s] == nil {
-		player.scenarioResults[s] = new(results)
+	for _, move := range player.handMoves[handIdx] {
+		// for each move they made this hand
+		s := scenario{
+			handString:         scenarioString,
+			dealerShowingValue: dealerHand.ShowingValue(),
+			move:               move,
+		}
+		if player.scenarioResults[s] == nil {
+			// if this scenario doesn't exist then add it
+			player.scenarioResults[s] = newResults()
+		}
+		player.scenarioResults[s].resultCount[result]++
 	}
+}
+
+func (player *LearnerPlayer) Summarize() (str string) {
+	player.scenarioResultsToCsv()
+	return ""
+}
+
+var moveStringMap = map[int]string{
+	c.MOVE_SPLIT:  "split",
+	c.MOVE_STAY:   "stay",
+	c.MOVE_HIT:    "hit",
+	c.MOVE_DOUBLE: "double",
+}
+
+func (player *LearnerPlayer) scenarioResultsToCsv() {
+	str := "hand,upcard,move,win,lose,push"
+	for scenario, result := range player.scenarioResults {
+		str = fmt.Sprintf("%s\n%s,%d,%s,%d,%d,%d",
+			str,
+			scenario.handString,
+			scenario.dealerShowingValue,
+			moveStringMap[scenario.move],
+			result.resultCount[c.RESULT_WIN],
+			result.resultCount[c.RESULT_BUST]+result.resultCount[c.RESULT_LOSE],
+			result.resultCount[c.RESULT_PUSH],
+		)
+	}
+
+	f, _ := os.Create(fmt.Sprintf("./out/learn-%d.csv", time.Now().UnixNano()))
+	defer f.Close()
+	f.WriteString(str)
+	f.Sync()
 }

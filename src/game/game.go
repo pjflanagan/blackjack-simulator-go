@@ -7,6 +7,10 @@ import (
 
 const ()
 
+type Summary struct {
+	// []player.PlayerSummary
+}
+
 // Game represents a blackjack game
 type Game struct {
 	Table *Table
@@ -32,7 +36,7 @@ func (game *Game) AddPlayer(playerType int) {
 }
 
 // Play is the main game loop
-func (game *Game) Play() {
+func (game *Game) Play() { // *Summary
 	hasActivePlayer := true
 	for hasActivePlayer {
 		// while there are active players
@@ -44,5 +48,5 @@ func (game *Game) Play() {
 		game.Table.Payout()
 		game.Table.Reset()
 	}
-	// game.Table.FinalStats()
+	// return game.Table.Summarize()
 }
