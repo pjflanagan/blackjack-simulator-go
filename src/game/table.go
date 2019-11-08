@@ -32,7 +32,7 @@ func NewTable(minBet int, deckCount int) *Table {
 	}
 }
 
-// STEP 0: Seat ------------------------------------------------------------------------------------
+// Seat ------------------------------------------------------------------------------------
 
 // TakeSeat adds a player to the table
 func (table *Table) TakeSeat(newPlayer player.Player, isHuman bool) {
@@ -42,7 +42,7 @@ func (table *Table) TakeSeat(newPlayer player.Player, isHuman bool) {
 	}
 }
 
-// STEP 1: TakeBets --------------------------------------------------------------------------------
+// TakeBets --------------------------------------------------------------------------------
 
 // TakeBets goes through all the players and makes them take a bet
 // returns true if there is someone playing
@@ -64,7 +64,7 @@ func (table *Table) TakeBets() bool {
 	return table.hasPlayerOfStatus(c.PLAYER_ANTED)
 }
 
-// STEP 2: Deal ------------------------------------------------------------------------------------
+// Deal ------------------------------------------------------------------------------------
 
 // Deal burns a card, makes two passes and gives players and the dealer cards
 func (table *Table) Deal() {
@@ -77,19 +77,19 @@ func (table *Table) Deal() {
 				// deal each player face up in order
 				card := table.takeCard(true)
 				player.Deal(0, card)
-				if pass == 1 && player.IsBlackjack() {
-					// if the player his blackjack on the second pass then reward them
-					player.Blackjack()
+				if pass == 1 {
+					// check if the player got blackjack and output what the hand was
+					player.CheckDealtHand()
 				}
 			}
 		}
-		// deal the dealer after the players, if it is the first pass keep if face down
-		card := table.takeCard(pass == 1)
+		// deal the dealer after the players, if it is the first pass flip it face up, second pass is face down
+		card := table.takeCard(pass == 0)
 		table.Dealer.Deal(card)
 	}
 }
 
-// STEP 3: TakeTurns -------------------------------------------------------------------------------
+// TakeTurns -------------------------------------------------------------------------------
 
 // TakeTurns makes everyone take turns
 func (table *Table) TakeTurns() {
@@ -110,7 +110,7 @@ func (table *Table) TakeTurns() {
 func (table *Table) playerTurn(player player.Player, handIdx int) {
 	for handIsActive := true; handIsActive; {
 		// while the hand is active request the player to move
-		move := player.Move(handIdx)
+		move := player.Move(handIdx, table.Dealer.Hand)
 		switch move {
 		case c.MOVE_HIT:
 			// take a card out and give it to the player, conditional end
@@ -147,7 +147,6 @@ func (table *Table) dealerTurn() {
 	// if the dealer needs to take a turn then the dealer shows their card
 	revealCard := table.Dealer.RevealCard()
 	table.seeCard(revealCard)
-	fmt.Printf("Dealer reveals %s. \n", revealCard.Stringify())
 	for handIsActive := true; handIsActive; {
 		// while the dealer has an active turn
 		move := table.Dealer.Move()
@@ -155,12 +154,11 @@ func (table *Table) dealerTurn() {
 		case c.MOVE_HIT:
 			// if the dealer said hit then add a card to their hand
 			card := table.takeCard(true)
-			table.Dealer.Deal(card)
-			fmt.Printf("Dealer hits and receives %s.\n", card.Stringify())
+			table.Dealer.Hit(card)
 			handIsActive = !table.Dealer.DidBust()
 		case c.MOVE_STAY:
 			// if the dealer said stay then end the turn
-			fmt.Printf("Dealer stays.\n")
+			table.Dealer.Stay()
 			handIsActive = false
 		default:
 			// shouldn't happen
@@ -169,7 +167,7 @@ func (table *Table) dealerTurn() {
 	table.Dealer.PrintHand(table.hasHuman)
 }
 
-// STEP 4: Payout ----------------------------------------------------------------------------------
+// Payout ----------------------------------------------------------------------------------
 
 // Payout determines the winnings for each player
 func (table *Table) Payout() {
@@ -180,7 +178,7 @@ func (table *Table) Payout() {
 	}
 }
 
-// STEP 5: Reset -----------------------------------------------------------------------------------
+// Reset -----------------------------------------------------------------------------------
 
 // Reset resets the table
 func (table *Table) Reset() {

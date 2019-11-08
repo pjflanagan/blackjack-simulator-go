@@ -40,12 +40,8 @@ func (dealer *Dealer) Move() int {
 }
 
 // DidBust returns true if the dealer has bust
-func (dealer *Dealer) DidBust() (didBust bool) {
-	didBust = dealer.Hand.DidBust()
-	if didBust {
-		fmt.Printf("Dealer busts with%s.\n", dealer.Hand.ShorthandString())
-	}
-	return
+func (dealer *Dealer) DidBust() bool {
+	return dealer.Hand.DidBust()
 }
 
 // Reset gives the dealer a new hand
@@ -55,15 +51,34 @@ func (dealer *Dealer) Reset() {
 
 // RevealCard returns the dealer's hidden card
 func (dealer *Dealer) RevealCard() *cards.Card {
-	return dealer.Hand.RevealCard()
+	revealCard := dealer.Hand.RevealCard()
+	fmt.Printf("Dealer reveals %s. \n", revealCard.Stringify())
+	return revealCard
+}
+
+// Hit adds card to the hand and outputs info
+func (dealer *Dealer) Hit(card *cards.Card) {
+	dealer.Deal(card)
+	fmt.Printf("Dealer hits and receives %s.\n", card.Stringify())
+}
+
+// Stay prints that the dealer stays
+func (dealer *Dealer) Stay() {
+	fmt.Printf("Dealer stays.\n")
 }
 
 // PrintHand prints the dealer's hand
 func (dealer *Dealer) PrintHand(hasHuman bool) {
-	if hasHuman {
-		fmt.Printf("\n===== DEALER HAND =====\n")
-		fmt.Printf("%s\n", dealer.Hand.LongformString())
+	// if hasHuman {
+	// 	fmt.Printf("\n===== Dealer Hand =====\n")
+	// 	fmt.Printf("%s\n", dealer.Hand.LongformString())
+	// } else {
+	if dealer.Hand.Cards[1].IsFaceDown() {
+		fmt.Printf("Dealer is showing %s.\n", dealer.Hand.ShorthandString())
+	} else if dealer.Hand.DidBust() {
+		fmt.Printf("Dealer busts with %s.\n", dealer.Hand.ShorthandString())
 	} else {
-		fmt.Printf("Dealer has %s\n", dealer.Hand.ShorthandString())
+		fmt.Printf("Dealer has %s.\n", dealer.Hand.ShorthandString())
 	}
+	// }
 }

@@ -52,10 +52,10 @@ func (shoe *Shoe) Shuffle() {
 	shoe.deck = make([]*Card, len(allCards))
 	// shuffle
 	rand.Seed(time.Now().UnixNano())
-	perm := rand.Perm(len(allCards))
-	for i, v := range perm {
-		shoe.deck[v] = allCards[i]
-		shoe.deck[v].FlipUp()
+	randomDeckIdxs := rand.Perm(len(allCards))
+	for i, deckIdx := range randomDeckIdxs {
+		shoe.deck[deckIdx] = allCards[i]
+		shoe.deck[deckIdx].FlipUp()
 	}
 	// shoe.cut()
 	return

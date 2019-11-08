@@ -36,9 +36,16 @@ func (hand *Hand) Split() (splitHand *Hand) {
 }
 
 // RevealCard is used by the dealer to reveal all the cards
+// the second card is the hidden one
 func (hand *Hand) RevealCard() *Card {
-	hand.Cards[0].FlipUp()
-	return hand.Cards[0]
+	hand.Cards[1].FlipUp()
+	return hand.Cards[1]
+}
+
+// ShowingFace the face of the showing hand
+// the first card is the showing one
+func (hand *Hand) ShowingFace() int {
+	return hand.Cards[0].Face
 }
 
 // VALUE -------------------------------------------------------------------------------------------
@@ -174,8 +181,16 @@ func (hand *Hand) ShorthandSumString() (str string) {
 
 // ShorthandString returns the shorthand
 func (hand *Hand) ShorthandString() (str string) {
-	for _, card := range hand.Cards {
-		str = fmt.Sprintf("%s %s", str, card.Stringify())
+	if hand.Cards[1].IsFaceDown() {
+		// if the second card is face down then only show the first card
+		return hand.Cards[0].Stringify()
+	}
+	for i, card := range hand.Cards {
+		if i == 0 {
+			str = card.Stringify()
+		} else {
+			str = fmt.Sprintf("%s %s", str, card.Stringify())
+		}
 	}
 	return
 }

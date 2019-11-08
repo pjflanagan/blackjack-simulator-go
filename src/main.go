@@ -9,6 +9,6 @@ func main() {
 	// TODO: take command line input to determine what type of game we will be playing
 	game := game.NewGame(20, 1)
 	game.AddPlayer(c.TYPE_RANDOM)
-	game.AddPlayer(c.TYPE_HUMAN)
+	game.AddPlayer(c.TYPE_LEARNER)
 	game.Play()
 }
