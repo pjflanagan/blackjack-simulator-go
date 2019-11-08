@@ -80,7 +80,7 @@ func (player *basePlayer) CheckDealtHand() {
 }
 
 func (player *basePlayer) blackjack() {
-	player.payout(0, c.RESULT_BLACKJACK)
+	player.Chips += player.payout(0, c.RESULT_BLACKJACK) // give the money right away
 	player.Status = c.PLAYER_BLACKJACK
 }
 
@@ -92,7 +92,7 @@ func (player *basePlayer) validMoves() []string {
 
 // Hit returns true if hand is still active
 func (player *basePlayer) Hit(handIdx int, card *cards.Card) bool {
-	fmt.Printf("%s receives %s.\n", player.Name, card.Stringify())
+	fmt.Printf("%s hits and receives %s.\n", player.Name, card.Stringify())
 	return player.hit(handIdx, card)
 }
 
@@ -171,13 +171,13 @@ func (player *basePlayer) stay(handIdx int) {
 
 // Bust busts the players hand and sets the status
 func (player *basePlayer) Bust(handIdx int) {
-	fmt.Printf("%s busts and loses %d.\n", player.Name, player.Hands[handIdx].Wager)
+	fmt.Printf("%s busts and loses %d chips.\n", player.Name, player.Hands[handIdx].Wager)
 	player.bust(handIdx)
 }
 
 // Returns true if the player's hand is still active
 func (player *basePlayer) bust(handIdx int) {
-	player.payout(0, c.RESULT_BUST)
+	// no need to do payout they wont recieve money for this
 	if handIdx == len(player.Hands)-1 {
 		player.Status = c.PLAYER_BUST
 	} else {
@@ -188,38 +188,43 @@ func (player *basePlayer) bust(handIdx int) {
 // Payout ----------------------------------------------------------------------------------
 
 // payout does the math for the payout
-func (player *basePlayer) payout(handIdx int, result int) {
+// TODO: hold onto the wager so we can record data at the end
+func (player *basePlayer) payout(handIdx int, result int) int {
 	wager := player.Hands[handIdx].Wager
-	player.Hands[handIdx].Wager = 0
+	// player.Hands[handIdx].Wager = 0
 	switch result {
 	case c.RESULT_BLACKJACK:
-		player.Chips += (wager * 3 / 2) + wager
+		return (wager * 3 / 2) + wager
 	case c.RESULT_WIN:
-		player.Chips += wager + wager
+		return wager + wager
 	case c.RESULT_PUSH:
-		player.Chips += wager
+		return wager
 	case c.RESULT_BUST, c.RESULT_LOSE:
+		return 0
 	}
+	return 0
 }
 
 // result payout is called at the end of a turn (does not call payout if bust or blackjack)
 func (player *basePlayer) resultPayout(handIdx int, result int) {
+	wager := player.Hands[handIdx].Wager
+	payout := player.payout(handIdx, result)
 	switch result {
 	case c.RESULT_WIN:
-		fmt.Printf("%s won!\n", player.Name)
-		player.payout(handIdx, result)
+		fmt.Printf("%s won %d chips!\n", player.Name, wager)
+		player.Chips += payout
 	case c.RESULT_PUSH:
 		fmt.Printf("%s pushes.\n", player.Name)
-		player.payout(handIdx, result)
+		player.Chips += payout
 	case c.RESULT_LOSE:
-		fmt.Printf("%s lost.\n", player.Name)
-		player.payout(handIdx, result)
+		// do not add payout for lose, money has already been taken
+		fmt.Printf("%s lost %d chips.\n", player.Name, wager)
 	case c.RESULT_BLACKJACK:
-		// do not call payout for blackjack, money has already been given
-		fmt.Printf("%s had a blackjack!\n", player.Name)
+		// do not add payout for blackjack, money has already been given
+		fmt.Printf("%s had a blackjack and earned %d chips.\n", player.Name, payout-wager)
 	case c.RESULT_BUST:
-		// do not call payout for bust, money has already been taken
-		fmt.Printf("%s busted.\n", player.Name)
+		// do not add payout for bust, money has already been taken
+		fmt.Printf("%s busted and lost %d chips.\n", player.Name, wager)
 	}
 }
 

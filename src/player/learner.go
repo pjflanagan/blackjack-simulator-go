@@ -51,7 +51,7 @@ func (player *LearnerPlayer) CanBet(minBet int) bool {
 // Bet learners bet the minimum
 // this bet does not call the parent because we don't want to subtract chips from the learner
 func (player *LearnerPlayer) Bet(minBet int, count int) {
-	fmt.Printf("%s bets the minumum of %d.\n", player.Name, minBet)
+	fmt.Printf("%s bets the minumum of %d chips.\n", player.Name, minBet)
 	player.playedHands++
 	player.Hands[0].Wager = minBet
 	player.Status = c.PLAYER_ANTED

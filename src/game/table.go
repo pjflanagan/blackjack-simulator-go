@@ -52,6 +52,7 @@ func (table *Table) TakeBets() bool {
 	}
 	fmt.Printf("\n\n======= HAND %d =======\n", table.handCount)
 	fmt.Printf("The count is %d.\n", table.count)
+	fmt.Printf("\n == Bet ==\n")
 	for _, player := range table.Players {
 		if player.CanBet(table.minBet) {
 			// if the player can bet then ask them to bet
@@ -68,6 +69,7 @@ func (table *Table) TakeBets() bool {
 
 // Deal burns a card, makes two passes and gives players and the dealer cards
 func (table *Table) Deal() {
+	fmt.Printf("\n == Deal ==\n")
 	// burn a card
 	table.Shoe.Burn()
 	for pass := 0; pass < 2; pass++ {
@@ -87,13 +89,14 @@ func (table *Table) Deal() {
 		card := table.takeCard(pass == 0)
 		table.Dealer.Deal(card)
 	}
+	table.Dealer.PrintHand(table.hasHuman)
 }
 
 // TakeTurns -------------------------------------------------------------------------------
 
 // TakeTurns makes everyone take turns
 func (table *Table) TakeTurns() {
-	table.Dealer.PrintHand(table.hasHuman)
+	fmt.Printf("\n == Turns ==\n")
 	for _, player := range table.Players {
 		if player.StatusIs(c.PLAYER_JEPORADY) {
 			// for each player that is playing (in JEPORADY), make them play thier turn
@@ -171,8 +174,9 @@ func (table *Table) dealerTurn() {
 
 // Payout determines the winnings for each player
 func (table *Table) Payout() {
+	fmt.Printf("\n == Payout ==\n")
 	for _, player := range table.Players {
-		if player.StatusIs(c.PLAYER_STAY) {
+		if !player.StatusIs(c.PLAYER_OUT) {
 			player.Payout(table.Dealer.Hand)
 		}
 	}
@@ -228,7 +232,7 @@ func (table *Table) seeCard(card *cards.Card) {
 	}
 	value := card.Value()
 	switch value {
-	case cards.ACE_VALUE, 10:
+	case cards.ACE_VALUE, cards.FACE_VALUE:
 		table.count--
 	case 2, 3, 4, 5, 6:
 		table.count++
