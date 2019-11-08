@@ -81,6 +81,28 @@ func accountForAces(sum int, aceCount int) (int, bool) {
 	return sum, aceCount > 0
 }
 
+// MOVES -------------------------------------------------------------------------------------------
+
+func (hand *Hand) canDoubleDown(chips int) bool {
+	return len(hand.Cards) == 2 && chips > hand.Wager
+}
+
+// GetValidMoves returns an array of valid move ints
+func (hand *Hand) GetValidMoves(chips int) (moves []int) {
+	value, _ := hand.Value()
+	if didBust(value) || is21(value) {
+		return
+	}
+	moves = append(moves, c.MOVE_STAY, c.MOVE_HIT)
+	if hand.isPair() && chips > hand.Wager {
+		moves = append(moves, c.MOVE_SPLIT)
+	}
+	if hand.canDoubleDown(chips) {
+		moves = append(moves, c.MOVE_DOUBLE)
+	}
+	return
+}
+
 // RESULTS -----------------------------------------------------------------------------------------
 
 // DidBust returns true when the player has over 21
@@ -96,6 +118,10 @@ func didBust(value int) bool {
 // Is21 returns true when the player has 21
 func (hand *Hand) Is21() bool {
 	value, _ := hand.Value()
+	return is21(value)
+}
+
+func is21(value int) bool {
 	return value == 21
 }
 
@@ -138,6 +164,8 @@ func (hand *Hand) ShorthandSumString() (str string) {
 		return "blackjack"
 	} else if handType == c.HAND_PAIR {
 		return fmt.Sprintf("pair of %s's", hand.Cards[0].FaceName())
+	} else if is21(value) {
+		return "21"
 	} else if handType == c.HAND_SOFT {
 		return fmt.Sprintf("soft %d", value)
 	}

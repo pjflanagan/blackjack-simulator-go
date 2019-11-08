@@ -2,6 +2,7 @@ package constant
 
 const (
 	TYPE_HUMAN = iota
+	TYPE_RANDOM
 
 	// player status
 	PLAYER_READY

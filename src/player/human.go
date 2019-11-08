@@ -3,6 +3,7 @@ package player
 import (
 	"../cards"
 	c "../constant"
+	"../utils"
 	"bufio"
 	"fmt"
 	"os"
@@ -33,7 +34,7 @@ func (player *HumanPlayer) CanBet(minBet int) bool {
 // Bet prompts a player to bet
 func (player *HumanPlayer) Bet(minBet int, count int) {
 	var bet int
-	fmt.Printf("Place bet, you have %d chips [bet 0 to leave table]: ", player.Chips)
+	fmt.Printf("You have %d chips, place bet or 0 to leave: ", player.Chips)
 	_, _ = fmt.Scanf("%d", &bet)
 
 	if bet == 0 {
@@ -62,28 +63,52 @@ func (player *HumanPlayer) Blackjack() {
 // STEP 3: Move ------------------------------------------------------------------------------------
 
 // Move returns string representing the move
-func (player *HumanPlayer) Move(handIdx int) int {
+func (player *HumanPlayer) Move(handIdx int) (move int) {
 	player.printHumanHand(handIdx)
-	reader := bufio.NewReader(os.Stdin)
-	var move string
-	// TODO: validMoves
-	fmt.Print("Enter [h, s, d, or p]: ")
-	move, _ = reader.ReadString('\n')
-	move = strings.Replace(move, "\n", "", -1)
+	validMoves := player.Hands[handIdx].GetValidMoves(player.Chips)
 
-	switch move {
+	reader := bufio.NewReader(os.Stdin)
+	var input string
+	fmt.Printf("Enter %s: ", getValidMovePrompt(validMoves))
+	input, _ = reader.ReadString('\n')
+	input = strings.Replace(input, "\n", "", -1)
+
+	switch input {
 	case "h":
-		return c.MOVE_HIT
+		move = c.MOVE_HIT
 	case "s":
-		return c.MOVE_STAY
+		move = c.MOVE_STAY
 	case "d":
-		return c.MOVE_DOUBLE
+		move = c.MOVE_DOUBLE
 	case "p":
-		return c.MOVE_SPLIT
+		move = c.MOVE_SPLIT
 	default:
-		fmt.Printf("Move (%s) is invalid pick again.\n", move)
-		return player.Move(handIdx)
+		fmt.Printf("Move (%s) is invalid pick again.\n", input)
+		move = player.Move(handIdx)
 	}
+
+	if !utils.Contains(validMoves, move) {
+		fmt.Printf("Move (%s) is invalid pick again.\n", input)
+		move = player.Move(handIdx)
+	}
+	return
+}
+
+func getValidMovePrompt(validMoves []int) string {
+	var validMoveChars []string
+	for _, move := range validMoves {
+		switch move {
+		case c.MOVE_HIT:
+			validMoveChars = append(validMoveChars, "H")
+		case c.MOVE_STAY:
+			validMoveChars = append(validMoveChars, "S")
+		case c.MOVE_DOUBLE:
+			validMoveChars = append(validMoveChars, "D")
+		case c.MOVE_SPLIT:
+			validMoveChars = append(validMoveChars, "P")
+		}
+	}
+	return fmt.Sprintf("%s", validMoveChars)
 }
 
 // Hit returns true if hand is still active
@@ -146,7 +171,7 @@ func (player *HumanPlayer) Payout(dealerHand *cards.Hand) {
 // HELPERS
 
 func (player *HumanPlayer) printHumanHand(handIdx int) {
-	fmt.Printf("====== YOUR HAND ======\n")
+	fmt.Printf("\n====== YOUR HAND ======\n")
 	fmt.Printf("You have a %s.\n", player.Hands[handIdx].ShorthandSumString())
 	fmt.Printf("%s\n", player.Hands[handIdx].LongformString())
 }

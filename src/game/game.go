@@ -24,6 +24,8 @@ func (game *Game) AddPlayer(playerType int) {
 	switch playerType {
 	case c.TYPE_HUMAN:
 		game.Table.TakeSeat(player.NewHumanPlayer(), true)
+	case c.TYPE_RANDOM:
+		game.Table.TakeSeat(player.NewRandomPlayer(), false)
 	}
 }
 

@@ -40,8 +40,12 @@ func (dealer *Dealer) Move() int {
 }
 
 // DidBust returns true if the dealer has bust
-func (dealer *Dealer) DidBust() bool {
-	return dealer.Hand.DidBust()
+func (dealer *Dealer) DidBust() (didBust bool) {
+	didBust = dealer.Hand.DidBust()
+	if didBust {
+		fmt.Printf("Dealer busts with%s.\n", dealer.Hand.ShorthandString())
+	}
+	return
 }
 
 // Reset gives the dealer a new hand
@@ -57,7 +61,7 @@ func (dealer *Dealer) RevealCard() *cards.Card {
 // PrintHand prints the dealer's hand
 func (dealer *Dealer) PrintHand(hasHuman bool) {
 	if hasHuman {
-		fmt.Printf("===== DEALER HAND =====\n")
+		fmt.Printf("\n===== DEALER HAND =====\n")
 		fmt.Printf("%s\n", dealer.Hand.LongformString())
 	} else {
 		fmt.Printf("Dealer has %s\n", dealer.Hand.ShorthandString())

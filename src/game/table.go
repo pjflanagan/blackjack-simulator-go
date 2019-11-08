@@ -11,22 +11,24 @@ const ()
 
 // Table represents a blackjack table
 type Table struct {
-	Shoe     *cards.Shoe
-	Players  []player.Player
-	Dealer   *Dealer
-	minBet   int
-	count    int
-	hasHuman bool
+	Shoe      *cards.Shoe
+	Players   []player.Player
+	Dealer    *Dealer
+	minBet    int
+	count     int
+	hasHuman  bool
+	handCount int
 }
 
 // NewTable returns a table with defaults
 func NewTable(minBet int, deckCount int) *Table {
 	return &Table{
-		Shoe:    cards.NewShoe(deckCount),
-		Dealer:  NewDealer(),
-		Players: []player.Player{},
-		minBet:  minBet,
-		count:   0,
+		Shoe:      cards.NewShoe(deckCount),
+		Dealer:    NewDealer(),
+		Players:   []player.Player{},
+		minBet:    minBet,
+		count:     0,
+		handCount: 0,
 	}
 }
 
@@ -45,6 +47,10 @@ func (table *Table) TakeSeat(newPlayer player.Player, isHuman bool) {
 // TakeBets goes through all the players and makes them take a bet
 // returns true if there is someone playing
 func (table *Table) TakeBets() bool {
+	if !table.hasPlayerOfStatus(c.PLAYER_READY) {
+		return false
+	}
+	fmt.Printf("\n\n======= HAND %d =======\n", table.handCount)
 	fmt.Printf("The count is %d.\n", table.count)
 	for _, player := range table.Players {
 		if player.CanBet(table.minBet) {
@@ -178,6 +184,7 @@ func (table *Table) Payout() {
 
 // Reset resets the table
 func (table *Table) Reset() {
+	table.handCount++
 	for _, player := range table.Players {
 		if !player.StatusIs(c.PLAYER_OUT) {
 			player.Reset(table.minBet)

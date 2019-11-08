@@ -11,3 +11,9 @@ results in hopes of learning the best possible moves.
 - [ ] Refactor exported and unexported properties
 - [ ] Reorganize the base player, use player status in more clear way
 - [ ] Reorganize the table to be more clear
+- [ ] Terminal line stuff
+
+## Terminal stuff
+
+- [Colored output](https://medium.com/@inhereat/terminal-color-rendering-tool-library-support-8-16-colors-256-colors-by-golang-a68fb8deee86)
+- Remake existing lines for human player hand

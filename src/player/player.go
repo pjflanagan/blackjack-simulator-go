@@ -177,7 +177,7 @@ func (player *basePlayer) Reset(minBet int) {
 
 // STEP 6: Leave -----------------------------------------------------------------------------------
 
-func (player *HumanPlayer) LeaveSeat() {
+func (player *basePlayer) LeaveSeat() {
 	player.Status = c.PLAYER_OUT
 }
 
