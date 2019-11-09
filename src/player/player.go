@@ -38,7 +38,6 @@ type basePlayer struct {
 	Hands  []*cards.Hand
 	Chips  int
 	Status int
-	child  Player
 }
 
 func initBasePlayer(name string) basePlayer {
@@ -108,7 +107,7 @@ func (player *basePlayer) hit(handIdx int, card *cards.Card) bool {
 	player.Deal(handIdx, card)
 	if player.Hands[handIdx].DidBust() {
 		// if they bust then determine if turn is really over
-		player.child.Bust(handIdx)
+		player.Bust(handIdx)
 		return false
 	} else if player.Hands[handIdx].Is21() {
 		// if they hit 21 then this hand is over
@@ -155,7 +154,7 @@ func (player *basePlayer) doubleDown(handIdx int, card *cards.Card) {
 	player.Chips -= player.Hands[handIdx].Wager
 	player.Hands[handIdx].Wager *= 2
 	if player.Hands[handIdx].DidBust() {
-		player.child.Bust(handIdx)
+		player.Bust(handIdx)
 	} else {
 		player.stay(handIdx)
 	}
@@ -195,10 +194,8 @@ func (player *basePlayer) bust(handIdx int) {
 // Payout ----------------------------------------------------------------------------------
 
 // payout does the math for the payout
-// TODO: hold onto the wager so we can record data at the end
 func (player *basePlayer) payout(handIdx int, result int) int {
 	wager := player.Hands[handIdx].Wager
-	// player.Hands[handIdx].Wager = 0
 	switch result {
 	case c.RESULT_BLACKJACK:
 		return (wager * 3 / 2) + wager

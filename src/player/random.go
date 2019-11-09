@@ -19,11 +19,9 @@ type RandomPlayer struct {
 
 // NewRandomPlayer returns a new random player with name Random
 func NewRandomPlayer() *RandomPlayer {
-	randomPlayer := &RandomPlayer{
+	return &RandomPlayer{
 		basePlayer: initBasePlayer("Random"),
 	}
-	randomPlayer.basePlayer.child = randomPlayer
-	return randomPlayer
 }
 
 // Bet -------------------------------------------------------------------------------------

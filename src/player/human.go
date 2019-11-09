@@ -17,11 +17,9 @@ type HumanPlayer struct {
 
 // NewHumanPlayer returns a new human player with name You
 func NewHumanPlayer() *HumanPlayer {
-	humanPlayer := &HumanPlayer{
+	return &HumanPlayer{
 		basePlayer: initBasePlayer("Human"),
 	}
-	humanPlayer.basePlayer.child = humanPlayer
-	return humanPlayer
 }
 
 // Bet -------------------------------------------------------------------------------------

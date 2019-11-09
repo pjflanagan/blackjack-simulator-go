@@ -16,7 +16,7 @@ type Table struct {
 	Dealer    *Dealer
 	minBet    int
 	count     int
-	hasHuman  bool
+	hasHuman  bool // TODO: change to outputMode OUTPUT_HUMAN OUTPUT_LOG OUTPUT_NONE
 	handCount int
 }
 

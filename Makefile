@@ -16,4 +16,4 @@ test:
 
 clean:
 	reset
-	rm -rf ./out
+	# rm ./out/*

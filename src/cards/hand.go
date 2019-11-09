@@ -197,7 +197,7 @@ func (hand *Hand) ScenarioString() (str string) {
 		if value == ACE_VALUE {
 			return "pairA"
 		}
-		return fmt.Sprintf("pair%d", value)
+		return fmt.Sprintf("pair%d", value/2)
 	case handType == c.HAND_SOFT:
 		return fmt.Sprintf("soft%d", value)
 	case handType == c.HAND_HARD:
