@@ -10,7 +10,7 @@ func main() {
 	game := game.NewGame(20, 1)
 	game.AddPlayer(c.TYPE_RANDOM)
 	game.AddPlayer(c.TYPE_LEARNER)
-	game.AddPlayer(c.TYPE_HUMAN)
+	// game.AddPlayer(c.TYPE_HUMAN)
 	game.Play() // TODO: return a game.Summary object
 }
 

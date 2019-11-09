@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	LEARNER_MAX_PLAYED_HANDS = 1000
+	LEARNER_MAX_PLAYED_HANDS = 100000
 )
 
 type resultData struct {
@@ -156,15 +156,14 @@ func (player *LearnerPlayer) addResult(dealerHand *cards.Hand, result int) {
 		switch result {
 		case c.RESULT_WIN:
 			// reAverage(player.scenarios[s][move], 1)
-			player.scenarios[s][move].successCount--
+			player.scenarios[s][move].successCount++
 			player.scenarios[s][move].count++
 		case c.RESULT_BUST, c.RESULT_LOSE:
 			// reAverage(player.scenarios[s][move], -1)
-			player.scenarios[s][move].successCount++
+			player.scenarios[s][move].successCount--
 			player.scenarios[s][move].count++
 		case c.RESULT_PUSH:
 			// reAverage(player.scenarios[s][move], 0)
-			player.scenarios[s][move].successCount++
 			player.scenarios[s][move].count++
 		default:
 			fmt.Printf("[ERROR]: stay result was something unexpected. \n")
@@ -200,16 +199,17 @@ func (player *LearnerPlayer) Summarize() (str string) {
 
 func (player *LearnerPlayer) scenariosToCsv() {
 	// stay and double represent the expected gain, hit represens the odds of not busting
-	str := "hand, upcard, stay win, stay count, hit doesn't bust, hit count, occurances"
+	str := "hand, upcard, stay win, hit doesn't bust, occurances"
 	for scenario, result := range player.scenarios {
-		str = fmt.Sprintf("%s\n%s, %d, %d, %d, %d, %d, %d",
+		if result[c.MOVE_STAY].count+result[c.MOVE_HIT].count == 0 {
+			continue
+		}
+		str = fmt.Sprintf("%s\n%s, %d, %s, %s, %d",
 			str,
 			scenario.HandString,
 			scenario.UpcardValue,
-			result[c.MOVE_STAY].successCount,
-			result[c.MOVE_STAY].count,
-			result[c.MOVE_HIT].successCount,
-			result[c.MOVE_HIT].count,
+			toPercent(result[c.MOVE_STAY].successCount, result[c.MOVE_STAY].count),
+			toPercent(result[c.MOVE_HIT].successCount, result[c.MOVE_HIT].count),
 			result[c.MOVE_STAY].count+result[c.MOVE_HIT].count,
 		)
 	}
@@ -220,6 +220,6 @@ func (player *LearnerPlayer) scenariosToCsv() {
 	f.Sync()
 }
 
-func toPercent(num float32) string {
-	return fmt.Sprintf("%.2f%%", num*100)
+func toPercent(num int, denom int) string {
+	return fmt.Sprintf("%.2f%%", float32(num)/float32(denom)*100)
 }

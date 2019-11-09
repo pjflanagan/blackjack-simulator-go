@@ -194,10 +194,12 @@ func (hand *Hand) StringScenarioCode() (str string) {
 	case is21(value), hand.isBlackjack(value), didBust(value):
 		return ""
 	case handType == c.HAND_PAIR:
-		if value == ACE_VALUE {
+		if hand.Cards[0].FaceName() == "A" {
+			// this could also be called a soft12 but I don't wanna call it that because nobody ever would
 			return "pairA"
 		}
-		return fmt.Sprintf("pair%d", value/2)
+		// we can compute the value of a split later, only worry about soft and hard scenarios
+		return fmt.Sprintf("hard%d", value)
 	case handType == c.HAND_SOFT:
 		return fmt.Sprintf("soft%d", value)
 	case handType == c.HAND_HARD:
