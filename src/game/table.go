@@ -83,7 +83,7 @@ func (table *Table) Deal() {
 				player.Deal(0, card)
 				if pass == 1 {
 					// check if the player got blackjack and output what the hand was
-					player.CheckDealtHand()
+					player.CheckDealtHand(table.Dealer.Hand)
 				}
 			}
 		}

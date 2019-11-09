@@ -42,15 +42,15 @@ func (hand *Hand) RevealCard() *Card {
 	return hand.Cards[1]
 }
 
-// ShowingFace the face of the showing hand
+// UpcardFace the face of the showing hand
 // the first card is the showing one
-func (hand *Hand) ShowingFace() int {
+func (hand *Hand) UpcardFace() int {
 	return hand.Cards[0].Face
 }
 
-// ShowingValue the face of the showing hand
+// UpcardValue the face of the showing hand
 // the first card is the showing one
-func (hand *Hand) ShowingValue() int {
+func (hand *Hand) UpcardValue() int {
 	return hand.Cards[0].Value()
 }
 
@@ -79,11 +79,6 @@ func (hand *Hand) Value() (int, int) {
 	}
 }
 
-func (hand *Hand) isPair() bool {
-	// if there are two cards in the hand and the face's (not the values) are the same
-	return len(hand.Cards) == 2 && hand.Cards[0].Face == hand.Cards[1].Face
-}
-
 func accountForAces(sum int, aceCount int) (int, bool) {
 	if sum > 21 && aceCount > 0 {
 		// if the value is over 21 but they have an ace then subtract 10
@@ -92,6 +87,11 @@ func accountForAces(sum int, aceCount int) (int, bool) {
 	}
 	// if they don't have any aces or the value is under 21 the existing sum is fine
 	return sum, aceCount > 0
+}
+
+func (hand *Hand) isPair() bool {
+	// if there are two cards in the hand and the face's (not the values) are the same
+	return len(hand.Cards) == 2 && hand.Cards[0].Face == hand.Cards[1].Face
 }
 
 // MOVES -------------------------------------------------------------------------------------------
@@ -116,8 +116,6 @@ func (hand *Hand) GetValidMoves(chips int) (moves []int) {
 	return
 }
 
-// RESULTS -----------------------------------------------------------------------------------------
-
 // DidBust returns true when the player has over 21
 func (hand *Hand) DidBust() bool {
 	value, _ := hand.Value()
@@ -126,6 +124,28 @@ func (hand *Hand) DidBust() bool {
 
 func didBust(value int) bool {
 	return value > 21
+}
+
+// RESULTS -----------------------------------------------------------------------------------------
+
+// Result looks at the player and dealer's hand and returns the string representing the result
+// this should realy only be called when a player has STAYed and will only return WIN, PUSH, LOSE
+func (hand *Hand) Result(dealerHand *Hand) int {
+	playerHandValue, _ := hand.Value()
+	dealerHandValue, _ := dealerHand.Value()
+	switch {
+	case didBust(playerHandValue):
+		return c.RESULT_BUST
+	case hand.isBlackjack(playerHandValue):
+		return c.RESULT_BLACKJACK
+	case didBust(dealerHandValue):
+		return c.RESULT_WIN
+	case playerHandValue == dealerHandValue:
+		return c.RESULT_PUSH
+	case playerHandValue > dealerHandValue:
+		return c.RESULT_WIN
+	}
+	return c.RESULT_LOSE
 }
 
 // Is21 returns true when the player has 21
@@ -148,30 +168,10 @@ func (hand *Hand) isBlackjack(value int) bool {
 	return value == 21 && len(hand.Cards) == 2 && !hand.hasBeenSplit
 }
 
-// Result looks at the player and dealer's hand and returns the string representing the result
-// this should realy only be called when a player has STAYed and will only return WIN, PUSH, LOSE
-func (hand *Hand) Result(dealerHand *Hand) int {
-	playerHandValue, _ := hand.Value()
-	dealerHandValue, _ := dealerHand.Value()
-	switch {
-	case didBust(playerHandValue):
-		return c.RESULT_BUST
-	case hand.isBlackjack(playerHandValue):
-		return c.RESULT_BLACKJACK
-	case didBust(dealerHandValue):
-		return c.RESULT_WIN
-	case playerHandValue == dealerHandValue:
-		return c.RESULT_PUSH
-	case playerHandValue > dealerHandValue:
-		return c.RESULT_WIN
-	}
-	return c.RESULT_LOSE
-}
-
 // OUTPUT ------------------------------------------------------------------------------------------
 
-// ShorthandSumString returns the shorthand
-func (hand *Hand) ShorthandSumString() (str string) {
+// StringSumReadable returns the shorthand
+func (hand *Hand) StringSumReadable() (str string) {
 	value, handType := hand.Value()
 	if didBust(value) {
 		return "bust"
@@ -187,8 +187,8 @@ func (hand *Hand) ShorthandSumString() (str string) {
 	return fmt.Sprintf("hard %d", value)
 }
 
-// ScenarioString returns the shorthand
-func (hand *Hand) ScenarioString() (str string) {
+// StringScenarioCode returns the shorthand
+func (hand *Hand) StringScenarioCode() (str string) {
 	value, handType := hand.Value()
 	switch {
 	case is21(value), hand.isBlackjack(value), didBust(value):
@@ -206,41 +206,24 @@ func (hand *Hand) ScenarioString() (str string) {
 	return ""
 }
 
-// GetShorthandString gets the shorthand string from a value and a hand
-func GetShorthandString(value int, handType int) string {
-	switch handType {
-	case c.HAND_PAIR:
-		oneCardValue := value / 2
-		if oneCardValue == ACE_VALUE {
-			return "ace pair"
-		}
-		return fmt.Sprintf("%d pair", oneCardValue)
-	case c.HAND_SOFT:
-		return fmt.Sprintf("soft %d", value)
-	case c.HAND_HARD:
-		return fmt.Sprintf("hard %d", value)
-	}
-	return ""
-}
-
-// ShorthandString returns the shorthand
-func (hand *Hand) ShorthandString() (str string) {
+// StringShorthandReadable returns the shorthand
+func (hand *Hand) StringShorthandReadable() (str string) {
 	if hand.Cards[1].IsFaceDown() {
 		// if the second card is face down then only show the first card
-		return hand.Cards[0].Stringify()
+		return hand.Cards[0].StringShorthand()
 	}
 	for i, card := range hand.Cards {
 		if i == 0 {
-			str = card.Stringify()
+			str = card.StringShorthand()
 		} else {
-			str = fmt.Sprintf("%s %s", str, card.Stringify())
+			str = fmt.Sprintf("%s %s", str, card.StringShorthand())
 		}
 	}
 	return
 }
 
-// LongformString turns the hand into a string
-func (hand *Hand) LongformString() (str string) {
+// StringLongformReadable turns the hand into a string
+func (hand *Hand) StringLongformReadable() (str string) {
 	for row := 0; row < 7; row++ {
 		for _, card := range hand.Cards {
 			if row == 0 {
@@ -250,7 +233,7 @@ func (hand *Hand) LongformString() (str string) {
 			} else if card.IsFaceDown() {
 				str = fmt.Sprintf("%s│░░░░░░░░░│ ", str)
 			} else {
-				cardinality, first, last := card.CardReadyStrings()
+				cardinality, first, last := card.StringsForLongform()
 				switch row {
 				case 1:
 					str = fmt.Sprintf("%s│%s       │ ", str, first)

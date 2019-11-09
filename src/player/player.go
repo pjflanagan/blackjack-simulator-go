@@ -13,7 +13,7 @@ type Player interface {
 	Bet(minBet int, count int)
 	// Deal
 	Deal(handIdx int, card *cards.Card)
-	CheckDealtHand()
+	CheckDealtHand(dealerHand *cards.Hand)
 	// Move
 	Move(handIdx int, dealerHand *cards.Hand) int
 	Hit(handIdx int, card *cards.Card) bool
@@ -70,12 +70,12 @@ func (player *basePlayer) Deal(handIdx int, card *cards.Card) {
 }
 
 // WasDealt prints a statment with what they we're dealt
-func (player *basePlayer) CheckDealtHand() {
+func (player *basePlayer) CheckDealtHand(dealerHand *cards.Hand) {
 	if player.Hands[0].IsBlackjack() {
-		fmt.Printf("%s hit blackjack with a %s!\n", player.Name, player.Hands[0].ShorthandString())
+		fmt.Printf("%s hit blackjack with a %s!\n", player.Name, player.Hands[0].StringShorthandReadable())
 		player.blackjack()
 	} else {
-		fmt.Printf("%s was dealt %s.\n", player.Name, player.Hands[0].ShorthandString())
+		fmt.Printf("%s was dealt %s.\n", player.Name, player.Hands[0].StringShorthandReadable())
 	}
 }
 
@@ -92,13 +92,13 @@ func (player *basePlayer) validMoves() []string {
 
 // Hit returns true if hand is still active
 func (player *basePlayer) Hit(handIdx int, card *cards.Card) bool {
-	fmt.Printf("%s hits and receives %s.\n", player.Name, card.Stringify())
+	fmt.Printf("%s hits and receives %s.\n", player.Name, card.StringShorthand())
 	return player.hit(handIdx, card)
 }
 
 // SplitHit returns true if hand is still active
 func (player *basePlayer) SplitHit(handIdx int, card *cards.Card) bool {
-	fmt.Printf("%s receives %s.\n", player.Name, card.Stringify())
+	fmt.Printf("%s receives %s.\n", player.Name, card.StringShorthand())
 	return player.hit(handIdx, card)
 }
 
@@ -145,7 +145,7 @@ func (player *basePlayer) split(handIdx int) {
 
 // DoubleDown doubles down
 func (player *basePlayer) DoubleDown(handIdx int, card *cards.Card) {
-	fmt.Printf("%s doubles down and receives %s.\n", player.Name, card.Stringify())
+	fmt.Printf("%s doubles down and receives %s.\n", player.Name, card.StringShorthand())
 	player.doubleDown(handIdx, card)
 }
 
@@ -277,6 +277,6 @@ func (player *basePlayer) StatusIs(statuses ...int) bool {
 // PrintVisualHand prints the hand in shap of a card
 func (player *basePlayer) PrintVisualHand(handIdx int) {
 	fmt.Printf("\n====== %s's Hand ======\n", player.Name)
-	fmt.Printf("You have a %s.\n", player.Hands[handIdx].ShorthandSumString())
-	fmt.Printf("%s\n", player.Hands[handIdx].LongformString())
+	fmt.Printf("You have a %s.\n", player.Hands[handIdx].StringSumReadable())
+	fmt.Printf("%s\n", player.Hands[handIdx].StringLongformReadable())
 }

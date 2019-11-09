@@ -16,4 +16,4 @@ test:
 
 clean:
 	reset
-	# rm ./out/*
+	rm ./out/*.csv

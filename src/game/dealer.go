@@ -52,14 +52,14 @@ func (dealer *Dealer) Reset() {
 // RevealCard returns the dealer's hidden card
 func (dealer *Dealer) RevealCard() *cards.Card {
 	revealCard := dealer.Hand.RevealCard()
-	fmt.Printf("Dealer reveals %s. \n", revealCard.Stringify())
+	fmt.Printf("Dealer reveals %s. \n", revealCard.StringShorthand())
 	return revealCard
 }
 
 // Hit adds card to the hand and outputs info
 func (dealer *Dealer) Hit(card *cards.Card) {
 	dealer.Deal(card)
-	fmt.Printf("Dealer hits and receives %s.\n", card.Stringify())
+	fmt.Printf("Dealer hits and receives %s.\n", card.StringShorthand())
 }
 
 // Stay prints that the dealer stays
@@ -71,14 +71,14 @@ func (dealer *Dealer) Stay() {
 func (dealer *Dealer) PrintHand(hasHuman bool) {
 	// if hasHuman {
 	// 	fmt.Printf("\n===== Dealer Hand =====\n")
-	// 	fmt.Printf("%s\n", dealer.Hand.LongformString())
+	// 	fmt.Printf("%s\n", dealer.Hand.StringLongformReadable())
 	// } else {
 	if dealer.Hand.Cards[1].IsFaceDown() {
-		fmt.Printf("Dealer is showing %s.\n", dealer.Hand.ShorthandString())
+		fmt.Printf("Dealer is showing %s.\n", dealer.Hand.StringShorthandReadable())
 	} else if dealer.Hand.DidBust() {
-		fmt.Printf("Dealer busts with %s.\n", dealer.Hand.ShorthandString())
+		fmt.Printf("Dealer busts with %s.\n", dealer.Hand.StringShorthandReadable())
 	} else {
-		fmt.Printf("Dealer has %s.\n", dealer.Hand.ShorthandString())
+		fmt.Printf("Dealer has %s.\n", dealer.Hand.StringShorthandReadable())
 	}
 	// }
 }

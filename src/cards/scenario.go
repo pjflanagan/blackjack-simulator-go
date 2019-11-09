@@ -6,13 +6,13 @@ type Scenario struct {
 }
 
 func NewScenario(hand *Hand, dealerHand *Hand) (Scenario, bool) {
-	scenarioString := hand.ScenarioString()
+	scenarioString := hand.StringScenarioCode()
 	if scenarioString == "" {
 		// TODO: start handling errors
 		return Scenario{}, false
 	}
 	return Scenario{
 		HandString:  scenarioString,
-		UpcardValue: dealerHand.ShowingValue(),
+		UpcardValue: dealerHand.UpcardValue(),
 	}, true
 }

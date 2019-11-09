@@ -26,6 +26,8 @@ func NewCard(face int, cardinality int) *Card {
 	}
 }
 
+// VALUE --------------------------------------------------------------------------------------------
+
 // valueMap maps integers to a value
 var valueMap = map[int]int{
 	1:  ACE_VALUE,
@@ -54,6 +56,8 @@ func GetFaceValue(face int) int {
 	return valueMap[face]
 }
 
+// FLIP --------------------------------------------------------------------------------------------
+
 // FlipDown turns a card face down
 func (card *Card) FlipDown() {
 	card.faceDown = true
@@ -73,6 +77,8 @@ func (card *Card) FlipUp() {
 func (card *Card) IsFaceUp() bool {
 	return !card.faceDown
 }
+
+// FACE --------------------------------------------------------------------------------------------
 
 // faceMap maps integers to face strings
 var faceMap = map[int]string{
@@ -100,6 +106,8 @@ func GetFaceString(face int) string {
 	return faceMap[face]
 }
 
+// STRING --------------------------------------------------------------------------------------------
+
 // cardinalitySymbolMap maps integers to a character
 var cardinalitySymbolMap = map[int]string{
 	1: "♠",
@@ -108,13 +116,13 @@ var cardinalitySymbolMap = map[int]string{
 	4: "♦",
 }
 
-// Stringify returns a string with just the value and cardinality symbol
-func (card *Card) Stringify() string {
+// StringShorthand returns a string with just the value and cardinality symbol
+func (card *Card) StringShorthand() string {
 	return fmt.Sprintf("%s%s", faceMap[card.Face], cardinalitySymbolMap[card.cardinality])
 }
 
-// CardReadyStrings returns cardinality, first face, last face
-func (card *Card) CardReadyStrings() (string, string, string) {
+// StringsForLongform returns cardinality, first face, last face
+func (card *Card) StringsForLongform() (string, string, string) {
 	cardinality := cardinalitySymbolMap[card.cardinality]
 	face := faceMap[card.Face]
 	if len(face) == 2 {
