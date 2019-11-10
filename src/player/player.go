@@ -236,7 +236,7 @@ func (player *basePlayer) resultPayout(handIdx int, result int) {
 
 func (player *basePlayer) Reset(minBet int) {
 	player.Hands = []*cards.Hand{cards.NewHand()}
-	if player.Chips > minBet {
+	if player.Chips >= minBet {
 		player.Status = c.PLAYER_READY
 	} else {
 		player.LeaveSeat()

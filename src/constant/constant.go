@@ -4,6 +4,7 @@ const (
 	TYPE_HUMAN = iota
 	TYPE_RANDOM
 	TYPE_LEARNER
+	TYPE_BASIC
 
 	// player status
 	PLAYER_READY

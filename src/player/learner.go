@@ -26,8 +26,8 @@ func newMoveResultDataMap() map[int]*resultData {
 	return s
 }
 
-// LearnerPlayer extends basePlayer, learner only plays one move per hand, HIT, DOUBLE, STAY (it will never split).
-// Every time it gets to an existing scenario it does whichever one was done last.
+// LearnerPlayer extends basePlayer, learner only plays one move per hand, HIT or STAY.
+// TODO: Every time it gets to an existing scenario it does whichever one was done last.
 // If busts it records it, otherwise it records the result for the whole hand
 
 type LearnerPlayer struct {
@@ -75,7 +75,7 @@ func (player *LearnerPlayer) CheckDealtHand(dealerHand *cards.Hand) {
 	} else {
 		fmt.Printf("%s was dealt %s. (%s, %d)\n",
 			player.Name, player.Hands[0].StringShorthandReadable(),
-			player.Hands[0].StringScenarioCode(),
+			player.Hands[0].StringScenarioCode(false),
 			dealerHand.UpcardValue(),
 		)
 	}
@@ -85,7 +85,7 @@ func (player *LearnerPlayer) CheckDealtHand(dealerHand *cards.Hand) {
 
 // Move returns string representing the move
 func (player *LearnerPlayer) Move(handIdx int, dealerHand *cards.Hand) (move int) {
-	fmt.Printf("%s has %s.\n", player.Name, player.Hands[handIdx].StringSumReadable())
+	fmt.Printf("%s has %s.\n", player.Name, player.Hands[0].StringSumReadable())
 
 	// only allow the player to move once
 	if player.lastMove != 0 {
@@ -97,18 +97,19 @@ func (player *LearnerPlayer) Move(handIdx int, dealerHand *cards.Hand) (move int
 	move = validMoves[rand.Intn(len(validMoves))]
 	player.lastMove = move
 
+	player.originalScenario, player.shouldRecordHand = player.addScenario(dealerHand)
+
+	return
+}
+
+func (player *LearnerPlayer) addScenario(dealerHand *cards.Hand) (cards.Scenario, bool) {
 	// record this original scenario, if this scenario doesn't exist then add it
-	s, shouldRecordHand := cards.NewScenario(player.Hands[handIdx], dealerHand)
+	s, shouldRecordHand := cards.NewScenarioFromHands(player.Hands[0], dealerHand, false)
 	if player.scenarios[s] == nil {
 		// if the scenario is new then add it
 		player.scenarios[s] = newMoveResultDataMap()
 	}
-	if shouldRecordHand {
-		player.originalScenario = s
-		player.shouldRecordHand = shouldRecordHand
-	}
-
-	return
+	return s, shouldRecordHand
 }
 
 // Payout ----------------------------------------------------------------------------------
@@ -129,55 +130,52 @@ func (player *LearnerPlayer) Payout(dealerHand *cards.Hand) {
 }
 
 func (player *LearnerPlayer) addResult(dealerHand *cards.Hand, result int) {
-	if !player.shouldRecordHand {
+	shouldRecordHand := player.shouldRecordHand
+	if !shouldRecordHand {
 		return
 	}
 	move := player.lastMove
 	s := player.originalScenario
 
-	switch move {
-	case c.MOVE_HIT:
-		// TODO: can also record current scenario if last scenario was a hit, so long as they didn't bust
-		// this would be a way to get a little more data out of the same move
+	if move == c.MOVE_HIT {
+		// if the move was a hit record data about it
 		switch result {
 		case c.RESULT_BUST:
-			// reAverage(player.scenarios[s][move], -1)
+			// if they bust then don't add to success, just count
 			player.scenarios[s][move].count++
 		case c.RESULT_LOSE, c.RESULT_PUSH, c.RESULT_WIN:
 			// if the player does not bust, count that as a win for hitting
 			// the actual win percent would be then based on the win percent of staying or hitting the following hand
-			// reAverage(player.scenarios[s][move], 1)
 			player.scenarios[s][move].successCount++
 			player.scenarios[s][move].count++
 		default:
+			// print that something went wrong
 			fmt.Printf("[ERROR]: hit result was something unexpected. \n")
 		}
-	case c.MOVE_STAY:
-		switch result {
-		case c.RESULT_WIN:
-			// reAverage(player.scenarios[s][move], 1)
-			player.scenarios[s][move].successCount++
-			player.scenarios[s][move].count++
-		case c.RESULT_BUST, c.RESULT_LOSE:
-			// reAverage(player.scenarios[s][move], -1)
-			player.scenarios[s][move].successCount--
-			player.scenarios[s][move].count++
-		case c.RESULT_PUSH:
-			// reAverage(player.scenarios[s][move], 0)
-			player.scenarios[s][move].count++
-		default:
-			fmt.Printf("[ERROR]: stay result was something unexpected. \n")
-		}
+		// if the scenario was a hit we can also record current scenario if last scenario was a hit, so long as they didn't bust
+		s, shouldRecordHand = player.addScenario(dealerHand)
+	}
+
+	if !shouldRecordHand {
+		// recheck should record hand because we might be checking the final hand
+		return
+	}
+	move = c.MOVE_STAY
+	switch result {
+	case c.RESULT_WIN:
+		player.scenarios[s][move].successCount++
+		player.scenarios[s][move].count++
+	case c.RESULT_LOSE:
+		player.scenarios[s][move].successCount--
+		player.scenarios[s][move].count++
+	case c.RESULT_PUSH:
+		player.scenarios[s][move].count++
+	case c.RESULT_BUST:
+		// do nothing if they bust, they cannot bust on a stay
 	default:
-		fmt.Printf("[ERROR]: move was something unexpected. \n")
+		fmt.Printf("[ERROR]: stay result was something unexpected. \n")
 	}
 }
-
-// func reAverage(rd *resultData, addToAverage int) {
-// 	total := rd.percentSuccess*float32(rd.count) + float32(addToAverage)
-// 	rd.count++
-// 	rd.percentSuccess = total / float32(rd.count)
-// }
 
 // RESET -------------------------------------------------------------------------------------------
 
@@ -221,5 +219,8 @@ func (player *LearnerPlayer) scenariosToCsv() {
 }
 
 func toPercent(num int, denom int) string {
+	if denom == 0 {
+		return "NA"
+	}
 	return fmt.Sprintf("%.2f%%", float32(num)/float32(denom)*100)
 }

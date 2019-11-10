@@ -31,7 +31,7 @@ func (player *RandomPlayer) CanBet(minBet int) bool {
 	return player.Chips >= minBet && player.Status == c.PLAYER_READY
 }
 
-// Bet random players bet the minumum (make a random amount instead)
+// Bet random players bet the minumum (TODO: make a random amount instead)
 func (player *RandomPlayer) Bet(minBet int, count int) {
 	bet := minBet
 	fmt.Printf("%s bets %d of %d chips available.\n", player.Name, bet, player.Chips)

@@ -188,17 +188,21 @@ func (hand *Hand) StringSumReadable() (str string) {
 }
 
 // StringScenarioCode returns the shorthand
-func (hand *Hand) StringScenarioCode() (str string) {
+func (hand *Hand) StringScenarioCode(includePair bool) (str string) {
 	value, handType := hand.Value()
 	switch {
-	case is21(value), hand.isBlackjack(value), didBust(value):
+	case hand.isBlackjack(value), didBust(value):
 		return ""
+	case is21(value):
+		return "21"
 	case handType == c.HAND_PAIR:
 		if hand.Cards[0].FaceName() == "A" {
 			// this could also be called a soft12 but I don't wanna call it that because nobody ever would
 			return "pairA"
 		}
-		// we can compute the value of a split later, only worry about soft and hard scenarios
+		if includePair {
+			return fmt.Sprintf("pair%d", hand.Cards[0].Value())
+		}
 		return fmt.Sprintf("hard%d", value)
 	case handType == c.HAND_SOFT:
 		return fmt.Sprintf("soft%d", value)
