@@ -11,6 +11,8 @@ const (
 	CARDINALITIES = 4
 	// FACES are 13
 	FACES = 13
+	// CARDS_IN_DECK
+	CARDS_IN_DECK = 52
 )
 
 // Shoe has multiple decks of cards
@@ -88,4 +90,8 @@ func (shoe *Shoe) Take() *Card {
 // Burn takes a card out of the shoe but does not return it (the table never sees it)
 func (shoe *Shoe) Burn() {
 	_ = shoe.Take()
+}
+
+func (shoe *Shoe) CardsRemaining() int {
+	return len(shoe.deck)
 }

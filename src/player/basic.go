@@ -31,6 +31,9 @@ func NewBasicStrategyPlayer() *BasicStrategyPlayer {
 }
 
 func makeScenarioMoveMap() {
+	if len(SCENARIO_MOVE) != 0 {
+		return
+	}
 	SCENARIO_MOVE = make(map[cards.Scenario]int)
 	// Open the file
 	csvfile, err := os.Open("./in/basic.csv")
@@ -63,7 +66,6 @@ func makeScenarioMoveMap() {
 }
 
 func getMoveFromString(move string) int {
-
 	switch strings.TrimSpace(move) {
 	case "h":
 		return c.MOVE_HIT
@@ -76,40 +78,30 @@ func getMoveFromString(move string) int {
 	}
 }
 
-// Bet ----------------------------------------------------------------------------------------------
-
-// CanBet returns true when a player can bet
-func (player *BasicStrategyPlayer) CanBet(minBet int) bool {
-	return player.Chips >= minBet && player.Status == c.PLAYER_READY
-}
-
-// Bet basic players bet the minumum
-func (player *BasicStrategyPlayer) Bet(minBet int, count int) {
-	bet := minBet
-	fmt.Printf("%s bets the minimum %d of %d chips available.\n", player.Name, bet, player.Chips)
-	player.bet(bet)
-	return
-}
-
 // Move ------------------------------------------------------------------------------------
 
 // Move returns string representing the move
 func (player *BasicStrategyPlayer) Move(handIdx int, dealerHand *cards.Hand) (move int) {
 	fmt.Printf("%s has %s.\n", player.Name, player.Hands[handIdx].StringSumReadable())
-	validMoves := player.Hands[handIdx].GetValidMoves(player.Chips)
+	return basicStrategyMove(player, handIdx, dealerHand)
+}
+
+func basicStrategyMove(player Player, handIdx int, dealerHand *cards.Hand) (move int) {
+	hand := player.GetHand(handIdx)
+	validMoves := hand.GetValidMoves(player.GetChips())
 	if len(validMoves) == 0 {
 		return c.MOVE_STAY
 	}
-	s, _ := cards.NewScenarioFromHands(player.Hands[0], dealerHand, true)
+	s, _ := cards.NewScenarioFromHands(player.GetHand(handIdx), dealerHand, true)
 	move = SCENARIO_MOVE[s]
 	if !utils.Contains(validMoves, move) {
-		if move == c.MOVE_SPLIT && player.Chips < player.Hands[handIdx].Wager {
-			s, _ := cards.NewScenarioFromHands(player.Hands[0], dealerHand, false)
+		if move == c.MOVE_SPLIT {
+			s, _ := cards.NewScenarioFromHands(player.GetHand(handIdx), dealerHand, false)
 			move = SCENARIO_MOVE[s]
-		} else if move == c.MOVE_DOUBLE && player.Chips < player.Hands[handIdx].Wager {
+		} else if move == c.MOVE_DOUBLE {
 			move = c.MOVE_HIT
 		} else {
-			fmt.Printf("\n ERROR, SHOULD NOT RETURN AN INVALID MOVE! \n")
+			log.Fatalf("\n Error, invalid move %d for scenario %+v", move, s)
 		}
 	}
 	return

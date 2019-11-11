@@ -24,13 +24,8 @@ func NewHumanPlayer() *HumanPlayer {
 
 // Bet -------------------------------------------------------------------------------------
 
-// CanBet returns true when a player can bet
-func (player *HumanPlayer) CanBet(minBet int) bool {
-	return player.Chips >= minBet && player.Status == c.PLAYER_READY
-}
-
 // Bet prompts a player to bet
-func (player *HumanPlayer) Bet(minBet int, count int) {
+func (player *HumanPlayer) Bet(minBet int, trueCount float32) {
 	var bet int
 	fmt.Printf("%s have %d chips, place bet or 0 to leave: ", player.Name, player.Chips)
 	_, _ = fmt.Scanf("%d", &bet)
@@ -40,11 +35,11 @@ func (player *HumanPlayer) Bet(minBet int, count int) {
 		return
 	} else if bet < 15 {
 		fmt.Printf("Bet (%d) is too low sir. ", bet)
-		player.Bet(minBet, count)
+		player.Bet(minBet, trueCount)
 		return
 	} else if bet > player.Chips {
 		fmt.Printf("Bet (%d) is more than what you have sir. ", bet)
-		player.Bet(minBet, count)
+		player.Bet(minBet, trueCount)
 		return
 	}
 	player.bet(bet)

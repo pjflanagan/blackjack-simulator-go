@@ -50,14 +50,15 @@ func (table *Table) TakeBets() bool {
 	if !table.hasPlayerOfStatus(c.PLAYER_READY) {
 		return false
 	}
+	trueCount := table.trueCount()
 	fmt.Printf("\n\n======= HAND %d =======\n", table.handCount)
-	fmt.Printf("The count is %d.\n", table.count)
+	fmt.Printf("The count is %d, the true count is %f.\n", table.count, trueCount)
 	fmt.Printf("\n == Bet ==\n")
 	for _, player := range table.Players {
 		if player.StatusIs(c.PLAYER_READY) {
 			if player.CanBet(table.minBet) {
 				// if the player can bet then ask them to bet
-				player.Bet(table.minBet, table.count)
+				player.Bet(table.minBet, trueCount)
 			} else {
 				// if they player can't bet then kick them out
 				player.LeaveSeat()
@@ -240,4 +241,13 @@ func (table *Table) seeCard(card *cards.Card) {
 		table.count++
 	case 7, 8, 9:
 	}
+}
+
+func (table *Table) trueCount() float32 {
+	decksRemaining := float32(table.Shoe.CardsRemaining()) / float32(cards.CARDS_IN_DECK)
+	if decksRemaining < 1 {
+		// to avoid an absurdly high true count when the shoe is almost empty
+		decksRemaining = 1
+	}
+	return float32(table.count) / decksRemaining
 }

@@ -34,6 +34,8 @@ func (game *Game) AddPlayer(playerType int) {
 		game.Table.TakeSeat(player.NewLearnerPlayer(), false)
 	case c.TYPE_BASIC:
 		game.Table.TakeSeat(player.NewBasicStrategyPlayer(), false)
+	case c.TYPE_COUNTER:
+		game.Table.TakeSeat(player.NewCardCounterPlayer(), false)
 	}
 }
 

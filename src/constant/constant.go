@@ -5,6 +5,7 @@ const (
 	TYPE_RANDOM
 	TYPE_LEARNER
 	TYPE_BASIC
+	TYPE_COUNTER
 
 	// player status
 	PLAYER_READY

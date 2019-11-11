@@ -10,7 +10,7 @@ import (
 type Player interface {
 	// Bet
 	CanBet(minBet int) bool
-	Bet(minBet int, count int)
+	Bet(minBet int, trueCount float32)
 	// Deal
 	Deal(handIdx int, card *cards.Card)
 	CheckDealtHand(dealerHand *cards.Hand)
@@ -29,6 +29,8 @@ type Player interface {
 	LeaveSeat()
 	// Helpers
 	GetHands() []*cards.Hand
+	GetHand(handIdx int) *cards.Hand
+	GetChips() int
 	StatusIs(statuses ...int) bool
 	PrintVisualHand(handIdx int)
 }
@@ -50,6 +52,17 @@ func initBasePlayer(name string) basePlayer {
 }
 
 // Bet -------------------------------------------------------------------------------------
+
+func (player *basePlayer) CanBet(minBet int) bool {
+	return player.Chips >= minBet && player.Status == c.PLAYER_READY
+}
+
+func (player *basePlayer) Bet(minBet int, trueCount float32) {
+	bet := minBet
+	fmt.Printf("%s bets the minimum %d of %d chips available.\n", player.Name, bet, player.Chips)
+	player.bet(bet)
+	return
+}
 
 // bet is the initial bet always on hand 0
 func (player *basePlayer) bet(bet int) {
@@ -262,6 +275,17 @@ func (player *basePlayer) Summarize() {
 // Hands
 func (player *basePlayer) GetHands() []*cards.Hand {
 	return player.Hands
+}
+
+func (player *basePlayer) GetHand(handIdx int) *cards.Hand {
+	if len(player.Hands) <= handIdx {
+		return nil
+	}
+	return player.Hands[handIdx]
+}
+
+func (player *basePlayer) GetChips() int {
+	return player.Chips
 }
 
 // StatusIs returns true if status is one of the strings
