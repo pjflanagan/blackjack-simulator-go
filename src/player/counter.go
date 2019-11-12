@@ -28,9 +28,15 @@ func NewCardCounterPlayer() *CardCounterPlayer {
 func (player *CardCounterPlayer) Bet(minBet int, trueCount float32) {
 	var bet int
 	if bettingUnits := trueCount - 1; bettingUnits > 1 {
+		// if the betting unit is less greater than 1 then bet that
 		bet = minBet * int(math.Floor(float64(trueCount)))
 	} else {
+		// otherwise bet the minimum
 		bet = minBet
+	}
+	if bet > player.Chips {
+		// if we chose to bet more than we have then bet it all
+		bet = player.Chips
 	}
 	fmt.Printf("%s bets %d of %d chips available.\n", player.Name, bet, player.Chips)
 	player.bet(bet)

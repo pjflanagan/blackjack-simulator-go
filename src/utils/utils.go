@@ -17,3 +17,11 @@ func Contains(s interface{}, e interface{}) bool {
 	}
 	return false
 }
+
+// Round rounds a number up or down
+func Round(val float64) int {
+	if val < 0 {
+		return int(val - 0.5)
+	}
+	return int(val + 0.5)
+}

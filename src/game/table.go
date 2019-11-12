@@ -91,7 +91,9 @@ func (table *Table) dealCheck() {
 	table.Dealer.PrintHand()
 	dealerBlackjack := table.Dealer.Peek()
 	for _, player := range table.Players {
-		player.CheckDealtHand(table.Dealer.Hand, dealerBlackjack)
+		if player.StatusIs(c.PLAYER_JEPORADY) {
+			player.CheckDealtHand(table.Dealer.Hand, dealerBlackjack)
+		}
 	}
 }
 
