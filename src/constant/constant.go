@@ -7,6 +7,11 @@ const (
 	TYPE_BASIC
 	TYPE_COUNTER
 
+	// output modes
+	OUTPUT_HUMAN
+	OUTPUT_LOG
+	OUTPUT_NONE
+
 	// player status
 	PLAYER_READY
 	PLAYER_ANTED
@@ -35,3 +40,9 @@ const (
 	MOVE_DOUBLE
 	MOVE_SPLIT
 )
+
+var OUTPUT_MODE int
+
+func SetOutputMode(mode int) {
+	OUTPUT_MODE = mode
+}

@@ -16,7 +16,6 @@ type Table struct {
 	Dealer    *Dealer
 	minBet    int
 	count     int
-	hasHuman  bool // TODO: change to outputMode OUTPUT_HUMAN OUTPUT_LOG OUTPUT_NONE
 	handCount int
 }
 
@@ -37,9 +36,6 @@ func NewTable(minBet int, deckCount int) *Table {
 // TakeSeat adds a player to the table
 func (table *Table) TakeSeat(newPlayer player.Player, isHuman bool) {
 	table.Players = append(table.Players, newPlayer)
-	if isHuman {
-		table.hasHuman = true
-	}
 }
 
 // TakeBets --------------------------------------------------------------------------------
@@ -82,17 +78,21 @@ func (table *Table) Deal() {
 				// deal each player face up in order
 				card := table.takeCard(true)
 				player.Deal(0, card)
-				if pass == 1 {
-					// check if the player got blackjack and output what the hand was
-					player.CheckDealtHand(table.Dealer.Hand)
-				}
 			}
 		}
 		// deal the dealer after the players, if it is the first pass flip it face up, second pass is face down
 		card := table.takeCard(pass == 0)
 		table.Dealer.Deal(card)
 	}
-	table.Dealer.PrintHand(table.hasHuman)
+	table.dealCheck()
+}
+
+func (table *Table) dealCheck() {
+	table.Dealer.PrintHand()
+	dealerBlackjack := table.Dealer.Peek()
+	for _, player := range table.Players {
+		player.CheckDealtHand(table.Dealer.Hand, dealerBlackjack)
+	}
 }
 
 // TakeTurns -------------------------------------------------------------------------------
@@ -170,7 +170,7 @@ func (table *Table) dealerTurn() {
 			// shouldn't happen
 		}
 	}
-	table.Dealer.PrintHand(table.hasHuman)
+	table.Dealer.PrintHand()
 }
 
 // Payout ----------------------------------------------------------------------------------

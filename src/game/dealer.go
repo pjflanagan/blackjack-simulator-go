@@ -28,6 +28,19 @@ func (dealer *Dealer) Deal(card *cards.Card) {
 	dealer.Hand.Add(card)
 }
 
+// Peek returns true when the dealer has blackjack
+func (dealer *Dealer) Peek() bool {
+	upcardValue := dealer.Hand.UpcardValue()
+	if upcardValue == 10 || upcardValue == 11 {
+		if dealer.Hand.IsBlackjack() {
+			fmt.Printf("Dealer peeks and reveals blackjack.\n")
+			return true
+		}
+		fmt.Printf("Dealer peeks and does not have blackjack.\n")
+	}
+	return false
+}
+
 // Move returns a string representing the dealer's move
 func (dealer *Dealer) Move() int {
 	value, handType := dealer.Hand.Value()
@@ -68,17 +81,19 @@ func (dealer *Dealer) Stay() {
 }
 
 // PrintHand prints the dealer's hand
-func (dealer *Dealer) PrintHand(hasHuman bool) {
-	// if hasHuman {
-	// 	fmt.Printf("\n===== Dealer Hand =====\n")
-	// 	fmt.Printf("%s\n", dealer.Hand.StringLongformReadable())
-	// } else {
-	if dealer.Hand.Cards[1].IsFaceDown() {
-		fmt.Printf("Dealer is showing %s.\n", dealer.Hand.StringShorthandReadable())
-	} else if dealer.Hand.DidBust() {
-		fmt.Printf("Dealer busts with %s.\n", dealer.Hand.StringShorthandReadable())
+func (dealer *Dealer) PrintHand() {
+	if c.OUTPUT_MODE == c.OUTPUT_NONE {
+		return
+	} else if c.OUTPUT_MODE == c.OUTPUT_HUMAN {
+		fmt.Printf("\n===== Dealer Hand =====\n")
+		fmt.Printf("%s\n", dealer.Hand.StringLongformReadable())
 	} else {
-		fmt.Printf("Dealer has %s.\n", dealer.Hand.StringShorthandReadable())
+		if dealer.Hand.Cards[1].IsFaceDown() {
+			fmt.Printf("Dealer is showing %s.\n", dealer.Hand.StringShorthandReadable())
+		} else if dealer.Hand.DidBust() {
+			fmt.Printf("Dealer busts with %s.\n", dealer.Hand.StringShorthandReadable())
+		} else {
+			fmt.Printf("Dealer has %s.\n", dealer.Hand.StringShorthandReadable())
+		}
 	}
-	// }
 }

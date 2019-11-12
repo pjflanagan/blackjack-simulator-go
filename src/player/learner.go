@@ -4,13 +4,12 @@ import (
 	"../cards"
 	c "../constant"
 	"fmt"
-	"math/rand"
 	"os"
 	"time"
 )
 
 const (
-	LEARNER_MAX_PLAYED_HANDS = 100000
+	LEARNER_MAX_PLAYED_HANDS = 10000
 )
 
 type resultData struct {
@@ -27,7 +26,6 @@ func newMoveResultDataMap() map[int]*resultData {
 }
 
 // LearnerPlayer extends basePlayer, learner only plays one move per hand, HIT or STAY.
-// TODO: Every time it gets to an existing scenario it does whichever one was done last.
 // If busts it records it, otherwise it records the result for the whole hand
 
 type LearnerPlayer struct {
@@ -66,13 +64,15 @@ func (player *LearnerPlayer) Bet(minBet int, trueCount float32) {
 
 // Deal ------------------------------------------------------------------------------------
 
-// WasDealt prints a statment with what they we're dealt
-func (player *LearnerPlayer) CheckDealtHand(dealerHand *cards.Hand) {
-	if player.Hands[0].IsBlackjack() {
-		fmt.Printf("%s hit blackjack with a %s!\n", player.Name, player.Hands[0].StringShorthandReadable())
-		player.blackjack()
+// CheckDealtHand checks to see if we should record this hand
+func (player *LearnerPlayer) CheckDealtHand(dealerHand *cards.Hand, dealerBlackjack bool) {
+	player.checkDealtHand(dealerHand, dealerBlackjack)
+	if player.Status != c.PLAYER_JEPORADY {
 		player.shouldRecordHand = false
-	} else {
+		if player.Status == c.PLAYER_BLACKJACK {
+			fmt.Printf("%s hit blackjack with a %s!\n", player.Name, player.Hands[0].StringShorthandReadable())
+		}
+	} else if player.Status == c.PLAYER_JEPORADY {
 		fmt.Printf("%s was dealt %s. (%s, %d)\n",
 			player.Name, player.Hands[0].StringShorthandReadable(),
 			player.Hands[0].StringScenarioCode(false),
@@ -92,13 +92,17 @@ func (player *LearnerPlayer) Move(handIdx int, dealerHand *cards.Hand) (move int
 		return c.MOVE_STAY
 	}
 
-	// valid moves are only these hits and stay, record times hit bust does not bust and times stay win
-	validMoves := []int{c.MOVE_HIT, c.MOVE_STAY}
-	move = validMoves[rand.Intn(len(validMoves))]
-	player.lastMove = move
-
+	// add the scenario in case it is new
 	player.originalScenario, player.shouldRecordHand = player.addScenario(dealerHand)
 
+	// valid moves are only these hits and stay, record times hit bust does not bust and times stay win
+	if moves := player.scenarios[player.originalScenario]; moves[c.MOVE_STAY].count > moves[c.MOVE_HIT].count {
+		move = c.MOVE_HIT
+	} else {
+		move = c.MOVE_STAY
+	}
+
+	player.lastMove = move
 	return
 }
 

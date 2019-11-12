@@ -7,9 +7,9 @@ import (
 
 const ()
 
-type Summary struct {
-	// []player.PlayerSummary
-}
+// type Summary struct {
+// 	[]player.PlayerSummary
+// }
 
 // Game represents a blackjack game
 type Game struct {

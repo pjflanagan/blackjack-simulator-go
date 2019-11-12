@@ -13,7 +13,7 @@ type Player interface {
 	Bet(minBet int, trueCount float32)
 	// Deal
 	Deal(handIdx int, card *cards.Card)
-	CheckDealtHand(dealerHand *cards.Hand)
+	CheckDealtHand(dealerHand *cards.Hand, dealerBlackjack bool)
 	// Move
 	Move(handIdx int, dealerHand *cards.Hand) int
 	Hit(handIdx int, card *cards.Card) bool
@@ -82,13 +82,33 @@ func (player *basePlayer) Deal(handIdx int, card *cards.Card) {
 	player.Status = c.PLAYER_JEPORADY
 }
 
-// WasDealt prints a statment with what they we're dealt
-func (player *basePlayer) CheckDealtHand(dealerHand *cards.Hand) {
-	if player.Hands[0].IsBlackjack() {
+// CheckDealtHand prints a statment with what they we're dealt
+func (player *basePlayer) CheckDealtHand(dealerHand *cards.Hand, dealerBlackjack bool) {
+	player.checkDealtHand(dealerHand, dealerBlackjack)
+	if player.Status == c.PLAYER_BLACKJACK {
 		fmt.Printf("%s hit blackjack with a %s!\n", player.Name, player.Hands[0].StringShorthandReadable())
-		player.blackjack()
-	} else {
+	} else if player.Status == c.PLAYER_JEPORADY {
 		fmt.Printf("%s was dealt %s.\n", player.Name, player.Hands[0].StringShorthandReadable())
+	}
+}
+
+func (player *basePlayer) checkDealtHand(dealerHand *cards.Hand, dealerBlackjack bool) {
+	if player.Hands[0].IsBlackjack() {
+		if dealerBlackjack {
+			// if they both hit blackjack then push
+			player.Status = c.PLAYER_BLACKJACK
+		} else {
+			// if just player hit blackjack then pay them
+			player.blackjack()
+		}
+	} else {
+		if dealerBlackjack {
+			// if the dealer hits blackjack then lose
+			player.Status = c.PLAYER_BUST
+		} else {
+			// otherwise we're playing the hand
+			player.Status = c.PLAYER_JEPORADY
+		}
 	}
 }
 
@@ -235,7 +255,11 @@ func (player *basePlayer) resultPayout(handIdx int, result int) {
 		player.Chips += payout
 	case c.RESULT_LOSE:
 		// do not add payout for lose, money has already been taken
-		fmt.Printf("%s lost to dealer and loses %d chips.\n", player.Name, wager)
+		fmt.Printf("%s lost to dealer with a %s and loses %d chips.\n",
+			player.Name,
+			player.Hands[handIdx].StringSumReadable(),
+			wager,
+		)
 	case c.RESULT_BLACKJACK:
 		// do not add payout for blackjack, money has already been given
 		fmt.Printf("%s had a blackjack and earned %d chips.\n", player.Name, payout-wager)

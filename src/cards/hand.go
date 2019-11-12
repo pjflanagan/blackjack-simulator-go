@@ -70,9 +70,11 @@ func (hand *Hand) Value() (int, int) {
 		// add the value to the sum
 		sum += cardValue
 	}
+
+	value, isSoft := accountForAces(sum, aceCount)
 	if hand.isPair() {
-		return sum, c.HAND_PAIR
-	} else if value, isSoft := accountForAces(sum, aceCount); isSoft {
+		return value, c.HAND_PAIR
+	} else if isSoft {
 		return value, c.HAND_SOFT
 	} else {
 		return value, c.HAND_HARD
@@ -90,8 +92,8 @@ func accountForAces(sum int, aceCount int) (int, bool) {
 }
 
 func (hand *Hand) isPair() bool {
-	// if there are two cards in the hand and the face's (not the values) are the same
-	return len(hand.Cards) == 2 && hand.Cards[0].Face == hand.Cards[1].Face
+	// if there are two cards in the hand and the value's are the same
+	return len(hand.Cards) == 2 && hand.Cards[0].Value() == hand.Cards[1].Value()
 }
 
 // MOVES -------------------------------------------------------------------------------------------
@@ -133,10 +135,13 @@ func didBust(value int) bool {
 func (hand *Hand) Result(dealerHand *Hand) int {
 	playerHandValue, _ := hand.Value()
 	dealerHandValue, _ := dealerHand.Value()
+	playerIsBlackjack := hand.isBlackjack(playerHandValue)
 	switch {
+	case dealerHand.isBlackjack(dealerHandValue) && playerIsBlackjack:
+		return c.RESULT_PUSH
 	case didBust(playerHandValue):
 		return c.RESULT_BUST
-	case hand.isBlackjack(playerHandValue):
+	case playerIsBlackjack:
 		return c.RESULT_BLACKJACK
 	case didBust(dealerHandValue):
 		return c.RESULT_WIN
@@ -185,31 +190,6 @@ func (hand *Hand) StringSumReadable() (str string) {
 		return fmt.Sprintf("soft %d", value)
 	}
 	return fmt.Sprintf("hard %d", value)
-}
-
-// StringScenarioCode returns the shorthand
-func (hand *Hand) StringScenarioCode(includePair bool) (str string) {
-	value, handType := hand.Value()
-	switch {
-	case hand.isBlackjack(value), didBust(value):
-		return ""
-	case is21(value):
-		return "21"
-	case handType == c.HAND_PAIR:
-		if hand.Cards[0].FaceName() == "A" {
-			// this could also be called a soft12 but I don't wanna call it that because nobody ever would
-			return "pairA"
-		}
-		if includePair {
-			return fmt.Sprintf("pair%d", hand.Cards[0].Value())
-		}
-		return fmt.Sprintf("hard%d", value)
-	case handType == c.HAND_SOFT:
-		return fmt.Sprintf("soft%d", value)
-	case handType == c.HAND_HARD:
-		return fmt.Sprintf("hard%d", value)
-	}
-	return ""
 }
 
 // StringShorthandReadable returns the shorthand

@@ -7,11 +7,12 @@ import (
 
 func main() {
 	// TODO: take command line input to determine what type of game we will be playing
-	game := game.NewGame(10, 3)
-	game.AddPlayer(c.TYPE_RANDOM)
+	game := game.NewGame(10, 6)
+	c.SetOutputMode(c.OUTPUT_NONE)
+	// game.AddPlayer(c.TYPE_RANDOM)
 	// game.AddPlayer(c.TYPE_BASIC)
-	game.AddPlayer(c.TYPE_COUNTER)
-	// game.AddPlayer(c.TYPE_LEARNER)
+	// game.AddPlayer(c.TYPE_COUNTER)
+	game.AddPlayer(c.TYPE_LEARNER)
 	// game.AddPlayer(c.TYPE_HUMAN)
 	game.Play() // TODO: return a game.Summary object
 }
