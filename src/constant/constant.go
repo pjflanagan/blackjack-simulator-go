@@ -43,6 +43,7 @@ const (
 	MOVE_STAY
 	MOVE_DOUBLE
 	MOVE_SPLIT
+	MOVE_DOUBLE_STAY // used by basic stategy
 
 	// default
 	DEFAULT_MIN   = 10

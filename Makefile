@@ -6,8 +6,13 @@ build:
 	rm -rf ./bin && mkdir -p ./bin
 	go build -o ./bin/blackjack ./src/main.go
 
-run:
-	./bin/blackjack COMPARE 10 6
+run: human
+
+compare:
+	./bin/blackjack COMPARE 10 6 > out/log.txt
+
+human:
+	./bin/blackjack COMPETE 10 1
 
 test:
 	go test ./src/cards

@@ -114,6 +114,7 @@ func (hand *Hand) GetValidMoves(chips int) (moves []int) {
 	}
 	if hand.canDoubleDown(chips) {
 		moves = append(moves, c.MOVE_DOUBLE)
+		moves = append(moves, c.MOVE_DOUBLE_STAY)
 	}
 	return
 }

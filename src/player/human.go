@@ -33,7 +33,7 @@ func (player *HumanPlayer) Bet(minBet int, trueCount float32) {
 	if bet == 0 {
 		player.LeaveSeat()
 		return
-	} else if bet < 15 {
+	} else if bet < minBet {
 		c.Print("Bet (%d) is too low sir. ", bet)
 		player.Bet(minBet, trueCount)
 		return

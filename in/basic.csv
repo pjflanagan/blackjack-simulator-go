@@ -21,8 +21,8 @@ soft14,  h, h, h, h, d, d, h, h, h, h
 soft15,  h, h, h, d, d, d, h, h, h, h
 soft16,  h, h, h, d, d, d, h, h, h, h
 soft17,  h, h, d, d, d, d, h, h, h, h
-soft18,  h, s, d, d, d, d, s, s, h, h
-soft19,  s, s, s, s, s, s, s, s, s, s
+soft18,  h, ds, ds, ds, ds, ds, s, s, h, h
+soft19,  s, s, s, s, s, ds, s, s, s, s
 soft20,  s, s, s, s, s, s, s, s, s, s
 21, B, B, B, B, B, B, B, B, B, B
 pairA,  p, p, p, p, p, p, p, p, p, p

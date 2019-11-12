@@ -27,7 +27,6 @@ func newMoveResultDataMap() map[int]*resultData {
 
 // LearnerPlayer extends basePlayer, learner only plays one move per hand, HIT or STAY.
 // If busts it records it, otherwise it records the result for the whole hand
-
 type LearnerPlayer struct {
 	basePlayer
 	shouldRecordHand bool

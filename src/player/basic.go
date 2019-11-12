@@ -72,6 +72,8 @@ func getMoveFromString(move string) int {
 		return c.MOVE_SPLIT
 	case "d":
 		return c.MOVE_DOUBLE
+	case "ds":
+		return c.MOVE_DOUBLE_STAY
 	default:
 		return c.MOVE_STAY
 	}
@@ -98,10 +100,18 @@ func basicStrategyMove(player Player, handIdx int, dealerHand *cards.Hand) (move
 			s, _ := cards.NewScenarioFromHands(player.GetHand(handIdx), dealerHand, false)
 			move = SCENARIO_MOVE[s]
 		} else if move == c.MOVE_DOUBLE {
+			// if move is double but we don't have the funds then hit
 			move = c.MOVE_HIT
+		} else if move == c.MOVE_DOUBLE_STAY {
+			// if double else stay but we don't have the funds then stay
+			move = c.MOVE_STAY
 		} else {
 			log.Fatalf("\n Error, invalid move %d for scenario %+v", move, s)
 		}
+	}
+	if move == c.MOVE_DOUBLE_STAY {
+		// if the double was valid then actually double (nothing else recognized MOVE_DOUBLE_STAY)
+		move = c.MOVE_DOUBLE
 	}
 	return
 }
