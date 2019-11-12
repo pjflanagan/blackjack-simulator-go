@@ -5,7 +5,6 @@ import (
 	c "../constant"
 	"../utils"
 	"encoding/csv"
-	"fmt"
 	"io"
 	"log"
 	"os"
@@ -82,7 +81,7 @@ func getMoveFromString(move string) int {
 
 // Move returns string representing the move
 func (player *BasicStrategyPlayer) Move(handIdx int, dealerHand *cards.Hand) (move int) {
-	fmt.Printf("%s has %s.\n", player.Name, player.Hands[handIdx].StringSumReadable())
+	c.Print("%s has %s.\n", player.Name, player.Hands[handIdx].StringSumReadable())
 	return basicStrategyMove(player, handIdx, dealerHand)
 }
 

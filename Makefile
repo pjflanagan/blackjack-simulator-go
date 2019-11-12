@@ -7,7 +7,7 @@ build:
 	go build -o ./bin/blackjack ./src/main.go
 
 run:
-	./bin/blackjack
+	./bin/blackjack COMPARE 10 6
 
 test:
 	go test ./src/cards

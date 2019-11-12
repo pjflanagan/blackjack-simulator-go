@@ -4,7 +4,6 @@ import (
 	"../cards"
 	c "../constant"
 	"../player"
-	"fmt"
 )
 
 const ()
@@ -47,9 +46,9 @@ func (table *Table) TakeBets() bool {
 		return false
 	}
 	trueCount := table.trueCount()
-	fmt.Printf("\n\n======= HAND %d =======\n", table.handCount)
-	fmt.Printf("The count is %d, the true count is %f.\n", table.count, trueCount)
-	fmt.Printf("\n == Bet ==\n")
+	c.Print("\n\n======= HAND %d =======\n", table.handCount)
+	c.Print("The count is %d, the true count is %f.\n", table.count, trueCount)
+	c.Print("\n == Bet ==\n")
 	for _, player := range table.Players {
 		if player.StatusIs(c.PLAYER_READY) {
 			if player.CanBet(table.minBet) {
@@ -68,7 +67,7 @@ func (table *Table) TakeBets() bool {
 
 // Deal burns a card, makes two passes and gives players and the dealer cards
 func (table *Table) Deal() {
-	fmt.Printf("\n == Deal ==\n")
+	c.Print("\n == Deal ==\n")
 	// burn a card
 	table.Shoe.Burn()
 	for pass := 0; pass < 2; pass++ {
@@ -101,7 +100,7 @@ func (table *Table) dealCheck() {
 
 // TakeTurns makes everyone take turns
 func (table *Table) TakeTurns() {
-	fmt.Printf("\n == Turns ==\n")
+	c.Print("\n == Turns ==\n")
 	for _, player := range table.Players {
 		if player.StatusIs(c.PLAYER_JEPORADY) {
 			// for each player that is playing (in JEPORADY), make them play thier turn
@@ -179,7 +178,7 @@ func (table *Table) dealerTurn() {
 
 // Payout determines the winnings for each player
 func (table *Table) Payout() {
-	fmt.Printf("\n == Payout ==\n")
+	c.Print("\n == Payout ==\n")
 	for _, player := range table.Players {
 		if !player.StatusIs(c.PLAYER_OUT) {
 			player.Payout(table.Dealer.Hand)
@@ -198,7 +197,7 @@ func (table *Table) Reset() {
 		}
 	}
 	if table.Shoe.NeedsShuffle() {
-		fmt.Printf("The dealer shuffles the deck.\n")
+		c.Print("The dealer shuffles the deck.\n")
 		table.Shoe.Shuffle()
 		table.count = 0
 	}

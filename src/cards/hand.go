@@ -183,7 +183,10 @@ func (hand *Hand) StringSumReadable() (str string) {
 	} else if hand.isBlackjack(value) {
 		return "blackjack"
 	} else if handType == c.HAND_PAIR {
-		return fmt.Sprintf("pair of %s's", hand.Cards[0].FaceName())
+		if hand.Cards[0].FaceName() == "A" {
+			return fmt.Sprintf("pair of aces")
+		}
+		return fmt.Sprintf("pair of %d's", value/2)
 	} else if is21(value) {
 		return "21"
 	} else if handType == c.HAND_SOFT {

@@ -27,18 +27,18 @@ func NewHumanPlayer() *HumanPlayer {
 // Bet prompts a player to bet
 func (player *HumanPlayer) Bet(minBet int, trueCount float32) {
 	var bet int
-	fmt.Printf("%s have %d chips, place bet or 0 to leave: ", player.Name, player.Chips)
+	c.Print("%s have %d chips, place bet or 0 to leave: ", player.Name, player.Chips)
 	_, _ = fmt.Scanf("%d", &bet)
 
 	if bet == 0 {
 		player.LeaveSeat()
 		return
 	} else if bet < 15 {
-		fmt.Printf("Bet (%d) is too low sir. ", bet)
+		c.Print("Bet (%d) is too low sir. ", bet)
 		player.Bet(minBet, trueCount)
 		return
 	} else if bet > player.Chips {
-		fmt.Printf("Bet (%d) is more than what you have sir. ", bet)
+		c.Print("Bet (%d) is more than what you have sir. ", bet)
 		player.Bet(minBet, trueCount)
 		return
 	}
@@ -59,7 +59,7 @@ func (player *HumanPlayer) Move(handIdx int, dealerHand *cards.Hand) (move int) 
 
 	reader := bufio.NewReader(os.Stdin)
 	var input string
-	fmt.Printf("Enter %s: ", getValidMovePrompt(validMoves))
+	c.Print("Enter %s: ", getValidMovePrompt(validMoves))
 	input, _ = reader.ReadString('\n')
 	input = strings.Replace(input, "\n", "", -1)
 
@@ -73,12 +73,12 @@ func (player *HumanPlayer) Move(handIdx int, dealerHand *cards.Hand) (move int) 
 	case "p":
 		move = c.MOVE_SPLIT
 	default:
-		fmt.Printf("Move (%s) is invalid pick again.\n", input)
+		c.Print("Move (%s) is invalid pick again.\n", input)
 		move = player.Move(handIdx, dealerHand)
 	}
 
 	if !utils.Contains(validMoves, move) {
-		fmt.Printf("Move (%s) is invalid pick again.\n", input)
+		c.Print("Move (%s) is invalid pick again.\n", input)
 		move = player.Move(handIdx, dealerHand)
 	}
 	return

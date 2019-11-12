@@ -1,5 +1,9 @@
 package constant
 
+import (
+	"fmt"
+)
+
 const (
 	TYPE_HUMAN = iota
 	TYPE_RANDOM
@@ -39,10 +43,21 @@ const (
 	MOVE_STAY
 	MOVE_DOUBLE
 	MOVE_SPLIT
+
+	// default
+	DEFAULT_MIN   = 10
+	DEFAULT_DECKS = 6
+	DEFAULT_CHIPS = 100
 )
 
 var OUTPUT_MODE int
 
 func SetOutputMode(mode int) {
 	OUTPUT_MODE = mode
+}
+
+func Print(base string, inserts ...interface{}) {
+	if OUTPUT_MODE != OUTPUT_NONE {
+		fmt.Printf(base, inserts...)
+	}
 }

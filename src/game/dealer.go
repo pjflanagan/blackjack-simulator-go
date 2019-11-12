@@ -3,7 +3,6 @@ package game
 import (
 	"../cards"
 	c "../constant"
-	"fmt"
 )
 
 const (
@@ -33,10 +32,10 @@ func (dealer *Dealer) Peek() bool {
 	upcardValue := dealer.Hand.UpcardValue()
 	if upcardValue == 10 || upcardValue == 11 {
 		if dealer.Hand.IsBlackjack() {
-			fmt.Printf("Dealer peeks and reveals blackjack.\n")
+			c.Print("Dealer peeks and reveals blackjack.\n")
 			return true
 		}
-		fmt.Printf("Dealer peeks and does not have blackjack.\n")
+		c.Print("Dealer peeks and does not have blackjack.\n")
 	}
 	return false
 }
@@ -65,35 +64,33 @@ func (dealer *Dealer) Reset() {
 // RevealCard returns the dealer's hidden card
 func (dealer *Dealer) RevealCard() *cards.Card {
 	revealCard := dealer.Hand.RevealCard()
-	fmt.Printf("Dealer reveals %s. \n", revealCard.StringShorthand())
+	c.Print("Dealer reveals %s. \n", revealCard.StringShorthand())
 	return revealCard
 }
 
 // Hit adds card to the hand and outputs info
 func (dealer *Dealer) Hit(card *cards.Card) {
 	dealer.Deal(card)
-	fmt.Printf("Dealer hits and receives %s.\n", card.StringShorthand())
+	c.Print("Dealer hits and receives %s.\n", card.StringShorthand())
 }
 
 // Stay prints that the dealer stays
 func (dealer *Dealer) Stay() {
-	fmt.Printf("Dealer stays.\n")
+	c.Print("Dealer stays.\n")
 }
 
 // PrintHand prints the dealer's hand
 func (dealer *Dealer) PrintHand() {
-	if c.OUTPUT_MODE == c.OUTPUT_NONE {
-		return
-	} else if c.OUTPUT_MODE == c.OUTPUT_HUMAN {
-		fmt.Printf("\n===== Dealer Hand =====\n")
-		fmt.Printf("%s\n", dealer.Hand.StringLongformReadable())
+	// if c.OUTPUT_MODE == c.OUTPUT_HUMAN {
+	// 	c.Print("\n===== Dealer Hand =====\n")
+	// 	c.Print("%s\n", dealer.Hand.StringLongformReadable())
+	// } else {
+	if dealer.Hand.Cards[1].IsFaceDown() {
+		c.Print("Dealer is showing %s.\n", dealer.Hand.StringShorthandReadable())
+	} else if dealer.Hand.DidBust() {
+		c.Print("Dealer busts with %s.\n", dealer.Hand.StringShorthandReadable())
 	} else {
-		if dealer.Hand.Cards[1].IsFaceDown() {
-			fmt.Printf("Dealer is showing %s.\n", dealer.Hand.StringShorthandReadable())
-		} else if dealer.Hand.DidBust() {
-			fmt.Printf("Dealer busts with %s.\n", dealer.Hand.StringShorthandReadable())
-		} else {
-			fmt.Printf("Dealer has %s.\n", dealer.Hand.StringShorthandReadable())
-		}
+		c.Print("Dealer has %s.\n", dealer.Hand.StringShorthandReadable())
 	}
+	// }
 }

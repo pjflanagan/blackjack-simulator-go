@@ -55,7 +55,7 @@ func (player *LearnerPlayer) CanBet(minBet int) bool {
 // Bet learners bet the minimum
 // this bet does not call the parent because we don't want to subtract chips from the learner
 func (player *LearnerPlayer) Bet(minBet int, trueCount float32) {
-	fmt.Printf("%s bets the minumum of %d chips.\n", player.Name, minBet)
+	c.Print("%s bets the minumum of %d chips.\n", player.Name, minBet)
 	player.playedHands++
 	player.Hands[0].Wager = minBet
 	player.Status = c.PLAYER_ANTED
@@ -70,10 +70,10 @@ func (player *LearnerPlayer) CheckDealtHand(dealerHand *cards.Hand, dealerBlackj
 	if player.Status != c.PLAYER_JEPORADY {
 		player.shouldRecordHand = false
 		if player.Status == c.PLAYER_BLACKJACK {
-			fmt.Printf("%s hit blackjack with a %s!\n", player.Name, player.Hands[0].StringShorthandReadable())
+			c.Print("%s hit blackjack with a %s!\n", player.Name, player.Hands[0].StringShorthandReadable())
 		}
 	} else if player.Status == c.PLAYER_JEPORADY {
-		fmt.Printf("%s was dealt %s. (%s, %d)\n",
+		c.Print("%s was dealt %s. (%s, %d)\n",
 			player.Name, player.Hands[0].StringShorthandReadable(),
 			player.Hands[0].StringScenarioCode(false),
 			dealerHand.UpcardValue(),
@@ -85,7 +85,7 @@ func (player *LearnerPlayer) CheckDealtHand(dealerHand *cards.Hand, dealerBlackj
 
 // Move returns string representing the move
 func (player *LearnerPlayer) Move(handIdx int, dealerHand *cards.Hand) (move int) {
-	fmt.Printf("%s has %s.\n", player.Name, player.Hands[0].StringSumReadable())
+	c.Print("%s has %s.\n", player.Name, player.Hands[0].StringSumReadable())
 
 	// only allow the player to move once
 	if player.lastMove != 0 {
@@ -154,7 +154,7 @@ func (player *LearnerPlayer) addResult(dealerHand *cards.Hand, result int) {
 			player.scenarios[s][move].count++
 		default:
 			// print that something went wrong
-			fmt.Printf("[ERROR]: hit result was something unexpected. \n")
+			c.Print("[ERROR]: hit result was something unexpected. \n")
 		}
 		// if the scenario was a hit we can also record current scenario if last scenario was a hit, so long as they didn't bust
 		s, shouldRecordHand = player.addScenario(dealerHand)
@@ -177,7 +177,7 @@ func (player *LearnerPlayer) addResult(dealerHand *cards.Hand, result int) {
 	case c.RESULT_BUST:
 		// do nothing if they bust, they cannot bust on a stay
 	default:
-		fmt.Printf("[ERROR]: stay result was something unexpected. \n")
+		c.Print("[ERROR]: stay result was something unexpected. \n")
 	}
 }
 

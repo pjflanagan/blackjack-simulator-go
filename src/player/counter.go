@@ -2,7 +2,7 @@ package player
 
 import (
 	"../cards"
-	"fmt"
+	c "../constant"
 	"math"
 )
 
@@ -38,14 +38,14 @@ func (player *CardCounterPlayer) Bet(minBet int, trueCount float32) {
 		// if we chose to bet more than we have then bet it all
 		bet = player.Chips
 	}
-	fmt.Printf("%s bets %d of %d chips available.\n", player.Name, bet, player.Chips)
+	c.Print("%s bets %d of %d chips available.\n", player.Name, bet, player.Chips)
 	player.bet(bet)
 	return
 }
 
 // Move plays basic strategy
 func (player *CardCounterPlayer) Move(handIdx int, dealerHand *cards.Hand) (move int) {
-	fmt.Printf("%s has %s.\n", player.Name, player.Hands[handIdx].StringSumReadable())
+	c.Print("%s has %s.\n", player.Name, player.Hands[handIdx].StringSumReadable())
 	return basicStrategyMove(player, handIdx, dealerHand)
 }
 

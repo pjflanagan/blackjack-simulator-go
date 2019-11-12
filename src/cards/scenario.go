@@ -46,11 +46,11 @@ func (hand *Hand) StringScenarioCode(includePair bool) (str string) {
 	case is21(value):
 		return "21"
 	case handType == c.HAND_PAIR:
-		if hand.Cards[0].FaceName() == "A" {
-			// this could also be called a soft12 but I don't wanna call it that because nobody ever would
-			return "pairA"
-		}
 		if includePair {
+			if hand.Cards[0].FaceName() == "A" {
+				// this could also be called a soft12 but I don't wanna call it that because nobody ever would
+				return "pairA"
+			}
 			return fmt.Sprintf("pair%d", hand.Cards[0].Value())
 		}
 		return fmt.Sprintf("hard%d", value)

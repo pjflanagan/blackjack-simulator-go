@@ -3,7 +3,6 @@ package player
 import (
 	"../cards"
 	c "../constant"
-	"fmt"
 )
 
 // Player is the base class for all players (excluding dealer)
@@ -46,7 +45,7 @@ func initBasePlayer(name string) basePlayer {
 	return basePlayer{
 		Name:   name,
 		Hands:  []*cards.Hand{cards.NewHand()},
-		Chips:  100,
+		Chips:  c.DEFAULT_CHIPS,
 		Status: c.PLAYER_READY,
 	}
 }
@@ -59,7 +58,7 @@ func (player *basePlayer) CanBet(minBet int) bool {
 
 func (player *basePlayer) Bet(minBet int, trueCount float32) {
 	bet := minBet
-	fmt.Printf("%s bets the minimum %d of %d chips available.\n", player.Name, bet, player.Chips)
+	c.Print("%s bets the minimum %d of %d chips available.\n", player.Name, bet, player.Chips)
 	player.bet(bet)
 	return
 }
@@ -86,9 +85,9 @@ func (player *basePlayer) Deal(handIdx int, card *cards.Card) {
 func (player *basePlayer) CheckDealtHand(dealerHand *cards.Hand, dealerBlackjack bool) {
 	player.checkDealtHand(dealerHand, dealerBlackjack)
 	if player.Status == c.PLAYER_BLACKJACK {
-		fmt.Printf("%s hit blackjack with a %s!\n", player.Name, player.Hands[0].StringShorthandReadable())
+		c.Print("%s hit blackjack with a %s!\n", player.Name, player.Hands[0].StringShorthandReadable())
 	} else if player.Status == c.PLAYER_JEPORADY {
-		fmt.Printf("%s was dealt %s.\n", player.Name, player.Hands[0].StringShorthandReadable())
+		c.Print("%s was dealt %s.\n", player.Name, player.Hands[0].StringShorthandReadable())
 	}
 }
 
@@ -125,13 +124,13 @@ func (player *basePlayer) validMoves() []string {
 
 // Hit returns true if hand is still active
 func (player *basePlayer) Hit(handIdx int, card *cards.Card) bool {
-	fmt.Printf("%s hits and receives %s.\n", player.Name, card.StringShorthand())
+	c.Print("%s hits and receives %s.\n", player.Name, card.StringShorthand())
 	return player.hit(handIdx, card)
 }
 
 // SplitHit returns true if hand is still active
 func (player *basePlayer) SplitHit(handIdx int, card *cards.Card) bool {
-	fmt.Printf("%s receives %s.\n", player.Name, card.StringShorthand())
+	c.Print("%s receives %s.\n", player.Name, card.StringShorthand())
 	return player.hit(handIdx, card)
 }
 
@@ -153,7 +152,7 @@ func (player *basePlayer) hit(handIdx int, card *cards.Card) bool {
 
 // Split splits the player's hand
 func (player *basePlayer) Split(handIdx int) {
-	fmt.Printf("%s splits.\n", player.Name)
+	c.Print("%s splits.\n", player.Name)
 	player.split(handIdx)
 }
 
@@ -178,7 +177,7 @@ func (player *basePlayer) split(handIdx int) {
 
 // DoubleDown doubles down
 func (player *basePlayer) DoubleDown(handIdx int, card *cards.Card) {
-	fmt.Printf("%s doubles down and receives %s.\n", player.Name, card.StringShorthand())
+	c.Print("%s doubles down and receives %s.\n", player.Name, card.StringShorthand())
 	player.doubleDown(handIdx, card)
 }
 
@@ -195,7 +194,7 @@ func (player *basePlayer) doubleDown(handIdx int, card *cards.Card) {
 
 // Stay returns true if the player's turn is still active
 func (player *basePlayer) Stay(handIdx int) {
-	fmt.Printf("%s stays.\n", player.Name)
+	c.Print("%s stays.\n", player.Name)
 	player.stay(handIdx)
 }
 
@@ -210,7 +209,7 @@ func (player *basePlayer) stay(handIdx int) {
 
 // Bust busts the players hand and sets the status
 func (player *basePlayer) Bust(handIdx int) {
-	fmt.Printf("%s busts and loses %d chips.\n", player.Name, player.Hands[handIdx].Wager)
+	c.Print("%s busts and loses %d chips.\n", player.Name, player.Hands[handIdx].Wager)
 	player.bust(handIdx)
 }
 
@@ -248,24 +247,24 @@ func (player *basePlayer) resultPayout(handIdx int, result int) {
 	payout := player.payout(handIdx, result)
 	switch result {
 	case c.RESULT_WIN:
-		fmt.Printf("%s beat dealer and wins %d chips!\n", player.Name, wager)
+		c.Print("%s beat dealer and wins %d chips!\n", player.Name, wager)
 		player.Chips += payout
 	case c.RESULT_PUSH:
-		fmt.Printf("%s ties dealer and pushes.\n", player.Name)
+		c.Print("%s ties dealer and pushes.\n", player.Name)
 		player.Chips += payout
 	case c.RESULT_LOSE:
 		// do not add payout for lose, money has already been taken
-		fmt.Printf("%s lost to dealer with a %s and loses %d chips.\n",
+		c.Print("%s lost to dealer with a %s and loses %d chips.\n",
 			player.Name,
 			player.Hands[handIdx].StringSumReadable(),
 			wager,
 		)
 	case c.RESULT_BLACKJACK:
 		// do not add payout for blackjack, money has already been given
-		fmt.Printf("%s had a blackjack and earned %d chips.\n", player.Name, payout-wager)
+		c.Print("%s had a blackjack and earned %d chips.\n", player.Name, payout-wager)
 	case c.RESULT_BUST:
 		// do not add payout for bust, money has already been taken
-		fmt.Printf("%s busted and lost %d chips.\n", player.Name, wager)
+		c.Print("%s busted and lost %d chips.\n", player.Name, wager)
 	}
 }
 
@@ -283,14 +282,14 @@ func (player *basePlayer) Reset(minBet int) {
 // Leave -----------------------------------------------------------------------------------
 
 func (player *basePlayer) LeaveSeat() {
-	fmt.Printf("%s has left with %d chips.\n", player.Name, player.Chips)
+	c.Print("%s has left with %d chips.\n", player.Name, player.Chips)
 	player.Status = c.PLAYER_OUT
 }
 
 // Summarize -----------------------------------------------------------------------------------
 
 func (player *basePlayer) Summarize() {
-	fmt.Printf("%s has %d chips after _ hands.\n", player.Name, player.Chips)
+	c.Print("%s has %d chips after _ hands.\n", player.Name, player.Chips)
 	// return Summary{}
 }
 
@@ -324,7 +323,7 @@ func (player *basePlayer) StatusIs(statuses ...int) bool {
 
 // PrintVisualHand prints the hand in shap of a card
 func (player *basePlayer) PrintVisualHand(handIdx int) {
-	fmt.Printf("\n====== %s's Hand ======\n", player.Name)
-	fmt.Printf("You have a %s.\n", player.Hands[handIdx].StringSumReadable())
-	fmt.Printf("%s\n", player.Hands[handIdx].StringLongformReadable())
+	c.Print("\n====== %s's Hand ======\n", player.Name)
+	c.Print("You have a %s.\n", player.Hands[handIdx].StringSumReadable())
+	c.Print("%s\n", player.Hands[handIdx].StringLongformReadable())
 }
