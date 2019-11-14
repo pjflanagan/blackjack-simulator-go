@@ -38,7 +38,7 @@ func NewTable(minBet int, deckCount int) *Table {
 // Seat ------------------------------------------------------------------------------------
 
 // TakeSeat adds a player to the table
-func (table *Table) TakeSeat(newPlayer player.Player, isHuman bool) {
+func (table *Table) TakeSeat(newPlayer player.Player) {
 	table.Players = append(table.Players, newPlayer)
 }
 

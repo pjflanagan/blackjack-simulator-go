@@ -11,10 +11,6 @@ import (
 	"strings"
 )
 
-const (
-	BASIC_PAYOUT_LEAVE = 200
-)
-
 var SCENARIO_MOVE map[cards.Scenario]int
 
 type BasicStrategyPlayer struct {
@@ -22,10 +18,10 @@ type BasicStrategyPlayer struct {
 }
 
 // NewBasicStrategyPlayer returns a player that plays basic strategy
-func NewBasicStrategyPlayer() *BasicStrategyPlayer {
+func NewBasicStrategyPlayer(playerRules *PlayerRules) *BasicStrategyPlayer {
 	makeScenarioMoveMap()
 	return &BasicStrategyPlayer{
-		basePlayer: initBasePlayer("Basic"),
+		basePlayer: initBasePlayer("Basic", playerRules),
 	}
 }
 
@@ -114,20 +110,6 @@ func basicStrategyMove(player Player, handIdx int, dealerHand *cards.Hand) (move
 		move = c.MOVE_DOUBLE
 	}
 	return
-}
-
-// Payout ----------------------------------------------------------------------------------
-
-// Payout print's message hand handles the payout
-func (player *BasicStrategyPlayer) Payout(dealerHand *cards.Hand) {
-	for i, hand := range player.Hands {
-		result := hand.Result(dealerHand)
-		player.resultPayout(i, result)
-	}
-
-	if player.Chips > BASIC_PAYOUT_LEAVE {
-		player.LeaveSeat()
-	}
 }
 
 // HELPERS

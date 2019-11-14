@@ -36,22 +36,31 @@ type Player interface {
 	Summarize() *stats.Stats
 }
 
+type PlayerRules struct {
+	StartingChips int // chips they start with
+	LeavingChips  int // chips they'll leave at
+	MaxHands      int // hand they'll leave at, -1 for infinite
+}
+
 type basePlayer struct {
 	Name        string
 	Hands       []*cards.Hand
 	Chips       int
 	Status      int
-	Stats       *stats.Stats
 	handsPlayed int
+	playerRules *PlayerRules
 }
 
-func initBasePlayer(name string) basePlayer {
+func initBasePlayer(name string, playerRules *PlayerRules) basePlayer {
+	if playerRules.StartingChips == 0 {
+		playerRules.StartingChips = c.DEFAULT_CHIPS
+	}
 	return basePlayer{
-		Name:   name,
-		Hands:  []*cards.Hand{cards.NewHand()},
-		Chips:  c.DEFAULT_CHIPS,
-		Status: c.PLAYER_READY,
-		Stats:  stats.NewStats(name),
+		Name:        name,
+		Hands:       []*cards.Hand{cards.NewHand()},
+		Chips:       playerRules.StartingChips,
+		Status:      c.PLAYER_READY,
+		playerRules: playerRules,
 	}
 }
 
@@ -230,6 +239,18 @@ func (player *basePlayer) bust(handIdx int) {
 
 // Payout ----------------------------------------------------------------------------------
 
+// Payout print's message hand handles the payout
+func (player *basePlayer) Payout(dealerHand *cards.Hand) {
+	for i, hand := range player.Hands {
+		result := hand.Result(dealerHand)
+		player.resultPayout(i, result)
+	}
+
+	if player.Chips > player.playerRules.LeavingChips || (player.playerRules.MaxHands != 0 && player.handsPlayed > player.playerRules.MaxHands) {
+		player.LeaveSeat()
+	}
+}
+
 // payout does the math for the payout
 func (player *basePlayer) payout(handIdx int, result int) int {
 	wager := player.Hands[handIdx].Wager
@@ -296,7 +317,7 @@ func (player *basePlayer) LeaveSeat() {
 
 func (player *basePlayer) Summarize() *stats.Stats {
 	c.Print("%s has %d chips after %d hands.\n", player.Name, player.Chips, player.handsPlayed)
-	return player.Stats
+	return stats.NewStats(player.Name, player.Chips-player.playerRules.StartingChips)
 }
 
 // HELPERS -----------------------------------------------------------------------------------------

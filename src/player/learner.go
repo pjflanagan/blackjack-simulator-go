@@ -8,10 +8,6 @@ import (
 	"time"
 )
 
-const (
-	LEARNER_MAX_PLAYED_HANDS = 10000
-)
-
 type resultData struct {
 	// percentSuccess float32 // map of result to the value change
 	successCount int
@@ -36,9 +32,9 @@ type LearnerPlayer struct {
 }
 
 // NewLearnerPlayer returns a new random player with name Random
-func NewLearnerPlayer() *LearnerPlayer {
+func NewLearnerPlayer(playerRules *PlayerRules) *LearnerPlayer {
 	return &LearnerPlayer{
-		basePlayer: initBasePlayer("Learner"),
+		basePlayer: initBasePlayer("Learner", playerRules),
 		scenarios:  make(map[cards.Scenario]map[int]*resultData),
 	}
 }
@@ -124,7 +120,7 @@ func (player *LearnerPlayer) Payout(dealerHand *cards.Hand) {
 	player.resultPayout(0, result)
 	player.Chips = 100
 
-	if player.handsPlayed > LEARNER_MAX_PLAYED_HANDS {
+	if player.handsPlayed > player.playerRules.MaxHands {
 		player.LeaveSeat()
 		player.scenariosToCsv() // TODO: move to stats
 	}

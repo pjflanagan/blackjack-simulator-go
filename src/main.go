@@ -3,6 +3,7 @@ package main
 import (
 	c "./constant"
 	"./game"
+	"./player"
 	"./stats"
 	"./utils"
 	"log"
@@ -55,23 +56,58 @@ func readArgs() (mode string, min int, decks int) {
 	return
 }
 
+// STORY
+
+var RANDOM_PLAYER_RULES_STORY = player.PlayerRules{
+	LeavingChips: 150,
+}
+
+var BASIC_PLAYER_RULES_STORY = player.PlayerRules{
+	LeavingChips: 200,
+}
+
+var COUNTER_PLAYER_RULES_STORY = player.PlayerRules{
+	LeavingChips: 300,
+}
+
 func story(min int, decks int) {
 	c.SetOutputMode(c.OUTPUT_LOG)
 	game := game.NewGame(min, decks)
-	game.AddPlayer(c.TYPE_RANDOM)
-	game.AddPlayer(c.TYPE_BASIC)
-	game.AddPlayer(c.TYPE_COUNTER)
+	game.AddPlayer(c.TYPE_RANDOM, &RANDOM_PLAYER_RULES_STORY)
+	game.AddPlayer(c.TYPE_BASIC, &BASIC_PLAYER_RULES_STORY)
+	game.AddPlayer(c.TYPE_COUNTER, &COUNTER_PLAYER_RULES_STORY)
 	game.Play()
 }
+
+// HUMAN
+
+var HUMAN_PLAYER_RULES = player.PlayerRules{}
 
 func human(min int, decks int) {
 	c.SetOutputMode(c.OUTPUT_HUMAN)
 	game := game.NewGame(min, decks)
-	game.AddPlayer(c.TYPE_RANDOM)
-	game.AddPlayer(c.TYPE_BASIC)
-	game.AddPlayer(c.TYPE_COUNTER)
-	game.AddPlayer(c.TYPE_HUMAN)
+	game.AddPlayer(c.TYPE_RANDOM, &RANDOM_PLAYER_RULES_STORY)
+	game.AddPlayer(c.TYPE_BASIC, &BASIC_PLAYER_RULES_STORY)
+	game.AddPlayer(c.TYPE_COUNTER, &COUNTER_PLAYER_RULES_STORY)
+	game.AddPlayer(c.TYPE_HUMAN, &HUMAN_PLAYER_RULES)
 	game.Play()
+}
+
+// COMPARE
+
+var RANDOM_PLAYER_RULES_COMPARE = player.PlayerRules{
+	LeavingChips: 150,
+	MaxHands:     15,
+}
+
+var BASIC_PLAYER_RULES_COMPARE = player.PlayerRules{
+	LeavingChips: 200,
+	MaxHands:     50,
+}
+
+var COUNTER_PLAYER_RULES_COMPARE = player.PlayerRules{
+	LeavingChips: 300,
+	MaxHands:     50,
 }
 
 func compare(min int, decks int) {
@@ -79,15 +115,23 @@ func compare(min int, decks int) {
 		go func() []*stats.Stats {
 			c.SetOutputMode(c.OUTPUT_NONE)
 			game := game.NewGame(min, decks)
-			game.AddPlayer(c.TYPE_LEARNER)
+			game.AddPlayer(c.TYPE_RANDOM, &RANDOM_PLAYER_RULES_COMPARE)
+			game.AddPlayer(c.TYPE_BASIC, &BASIC_PLAYER_RULES_COMPARE)
+			game.AddPlayer(c.TYPE_COUNTER, &COUNTER_PLAYER_RULES_COMPARE)
 			return game.Play()
 		}()
 	}
 }
 
+// LEARN
+
+var LEARNER_PLAYER_RULES = player.PlayerRules{
+	MaxHands: 10000,
+}
+
 func learn(min int, decks int) {
 	c.SetOutputMode(c.OUTPUT_NONE)
 	game := game.NewGame(min, decks)
-	game.AddPlayer(c.TYPE_LEARNER)
+	game.AddPlayer(c.TYPE_LEARNER, &LEARNER_PLAYER_RULES)
 	game.Play()
 }

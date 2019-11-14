@@ -6,19 +6,15 @@ import (
 	"math"
 )
 
-const (
-	COUNTER_PAYOUT_LEAVE = 300
-)
-
 type CardCounterPlayer struct {
 	basePlayer
 }
 
 // NewCardCounterPlayer returns a player that plays basic strategy
-func NewCardCounterPlayer() *CardCounterPlayer {
+func NewCardCounterPlayer(playerRules *PlayerRules) *CardCounterPlayer {
 	makeScenarioMoveMap()
 	return &CardCounterPlayer{
-		basePlayer: initBasePlayer("Counter"),
+		basePlayer: initBasePlayer("Counter", playerRules),
 	}
 }
 
@@ -47,16 +43,4 @@ func (player *CardCounterPlayer) Bet(minBet int, trueCount float32) {
 func (player *CardCounterPlayer) Move(handIdx int, dealerHand *cards.Hand) (move int) {
 	c.Print("%s has %s.\n", player.Name, player.Hands[handIdx].StringSumReadable())
 	return basicStrategyMove(player, handIdx, dealerHand)
-}
-
-// Payout print's message hand handles the payout
-func (player *CardCounterPlayer) Payout(dealerHand *cards.Hand) {
-	for i, hand := range player.Hands {
-		result := hand.Result(dealerHand)
-		player.resultPayout(i, result)
-	}
-
-	if player.Chips > COUNTER_PAYOUT_LEAVE {
-		player.LeaveSeat()
-	}
 }

@@ -16,9 +16,9 @@ type HumanPlayer struct {
 }
 
 // NewHumanPlayer returns a new human player with name You
-func NewHumanPlayer() *HumanPlayer {
+func NewHumanPlayer(playerRules *PlayerRules) *HumanPlayer {
 	return &HumanPlayer{
-		basePlayer: initBasePlayer("Human"),
+		basePlayer: initBasePlayer("Human", playerRules),
 	}
 }
 
@@ -59,7 +59,7 @@ func (player *HumanPlayer) Move(handIdx int, dealerHand *cards.Hand) (move int) 
 
 	reader := bufio.NewReader(os.Stdin)
 	var input string
-	c.Print("Enter %s: ", getValidMovePrompt(validMoves))
+	c.Print("Human has %s. Enter move %s: ", player.Hands[handIdx].StringSumReadable(), getValidMovePrompt(validMoves))
 	input, _ = reader.ReadString('\n')
 	input = strings.Replace(input, "\n", "", -1)
 

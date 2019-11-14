@@ -15,8 +15,11 @@ type Stats struct {
 	dChips   int    // delta chips
 }
 
-func NewStats(strategy string) *Stats {
-	return &Stats{}
+func NewStats(strategy string, dChips int) *Stats {
+	return &Stats{
+		strategy: strategy,
+		dChips:   dChips,
+	}
 }
 
 func (stats *Stats) Exchange(dChips int) {

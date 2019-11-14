@@ -7,8 +7,7 @@ import (
 )
 
 const (
-	// RANDOM_MAX_BET   = 30
-	RANDOM_MAX_CHIPS = 150 // random only has to win 50 chips to stop playing
+// RANDOM_MAX_BET   = 30
 )
 
 // RandomPlayer extends basePlayer
@@ -17,9 +16,9 @@ type RandomPlayer struct {
 }
 
 // NewRandomPlayer returns a new random player with name Random
-func NewRandomPlayer() *RandomPlayer {
+func NewRandomPlayer(playerRules *PlayerRules) *RandomPlayer {
 	return &RandomPlayer{
-		basePlayer: initBasePlayer("Random"),
+		basePlayer: initBasePlayer("Random", playerRules),
 	}
 }
 
@@ -46,20 +45,6 @@ func (player *RandomPlayer) Move(handIdx int, dealerHand *cards.Hand) (move int)
 		move = validMoves[rand.Intn(len(validMoves))]
 	}
 	return
-}
-
-// Payout ----------------------------------------------------------------------------------
-
-// Payout print's message hand handles the payout
-func (player *RandomPlayer) Payout(dealerHand *cards.Hand) {
-	for i, hand := range player.Hands {
-		result := hand.Result(dealerHand)
-		player.resultPayout(i, result)
-	}
-
-	if player.Chips > RANDOM_MAX_CHIPS {
-		player.LeaveSeat()
-	}
 }
 
 // HELPERS

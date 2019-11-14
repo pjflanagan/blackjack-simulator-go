@@ -21,18 +21,18 @@ func NewGame(minBet int, deckCount int) *Game {
 }
 
 // AddPlayer adds a new player to the game
-func (game *Game) AddPlayer(playerType int) {
+func (game *Game) AddPlayer(playerType int, playerRules *player.PlayerRules) {
 	switch playerType {
 	case c.TYPE_HUMAN:
-		game.Table.TakeSeat(player.NewHumanPlayer(), true)
+		game.Table.TakeSeat(player.NewHumanPlayer(playerRules))
 	case c.TYPE_RANDOM:
-		game.Table.TakeSeat(player.NewRandomPlayer(), false)
+		game.Table.TakeSeat(player.NewRandomPlayer(playerRules))
 	case c.TYPE_LEARNER:
-		game.Table.TakeSeat(player.NewLearnerPlayer(), false)
+		game.Table.TakeSeat(player.NewLearnerPlayer(playerRules))
 	case c.TYPE_BASIC:
-		game.Table.TakeSeat(player.NewBasicStrategyPlayer(), false)
+		game.Table.TakeSeat(player.NewBasicStrategyPlayer(playerRules))
 	case c.TYPE_COUNTER:
-		game.Table.TakeSeat(player.NewCardCounterPlayer(), false)
+		game.Table.TakeSeat(player.NewCardCounterPlayer(playerRules))
 	}
 }
 
