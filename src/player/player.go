@@ -3,6 +3,7 @@ package player
 import (
 	"../cards"
 	c "../constant"
+	"../stats"
 )
 
 // Player is the base class for all players (excluding dealer)
@@ -32,13 +33,16 @@ type Player interface {
 	GetChips() int
 	StatusIs(statuses ...int) bool
 	PrintVisualHand(handIdx int)
+	Summarize() *stats.Stats
 }
 
 type basePlayer struct {
-	Name   string
-	Hands  []*cards.Hand
-	Chips  int
-	Status int
+	Name        string
+	Hands       []*cards.Hand
+	Chips       int
+	Status      int
+	Stats       *stats.Stats
+	handsPlayed int
 }
 
 func initBasePlayer(name string) basePlayer {
@@ -47,13 +51,14 @@ func initBasePlayer(name string) basePlayer {
 		Hands:  []*cards.Hand{cards.NewHand()},
 		Chips:  c.DEFAULT_CHIPS,
 		Status: c.PLAYER_READY,
+		Stats:  stats.NewStats(name),
 	}
 }
 
 // Bet -------------------------------------------------------------------------------------
 
 func (player *basePlayer) CanBet(minBet int) bool {
-	return player.Chips >= minBet && player.Status == c.PLAYER_READY
+	return player.Chips >= minBet && player.StatusIs(c.PLAYER_READY)
 }
 
 func (player *basePlayer) Bet(minBet int, trueCount float32) {
@@ -65,7 +70,7 @@ func (player *basePlayer) Bet(minBet int, trueCount float32) {
 
 // bet is the initial bet always on hand 0
 func (player *basePlayer) bet(bet int) {
-	if player.Status == c.PLAYER_OUT {
+	if player.StatusIs(c.PLAYER_OUT) {
 		return
 	}
 	player.Chips -= bet
@@ -84,9 +89,9 @@ func (player *basePlayer) Deal(handIdx int, card *cards.Card) {
 // CheckDealtHand prints a statment with what they we're dealt
 func (player *basePlayer) CheckDealtHand(dealerHand *cards.Hand, dealerBlackjack bool) {
 	player.checkDealtHand(dealerHand, dealerBlackjack)
-	if player.Status == c.PLAYER_BLACKJACK {
+	if player.StatusIs(c.PLAYER_BLACKJACK) {
 		c.Print("%s hit blackjack with a %s!\n", player.Name, player.Hands[0].StringShorthandReadable())
-	} else if player.Status == c.PLAYER_JEPORADY {
+	} else if player.StatusIs(c.PLAYER_JEPORADY) {
 		c.Print("%s was dealt %s.\n", player.Name, player.Hands[0].StringShorthandReadable())
 	}
 }
@@ -272,6 +277,7 @@ func (player *basePlayer) resultPayout(handIdx int, result int) {
 
 func (player *basePlayer) Reset(minBet int) {
 	player.Hands = []*cards.Hand{cards.NewHand()}
+	player.handsPlayed++
 	if player.Chips >= minBet {
 		player.Status = c.PLAYER_READY
 	} else {
@@ -288,9 +294,9 @@ func (player *basePlayer) LeaveSeat() {
 
 // Summarize -----------------------------------------------------------------------------------
 
-func (player *basePlayer) Summarize() {
-	c.Print("%s has %d chips after _ hands.\n", player.Name, player.Chips)
-	// return Summary{}
+func (player *basePlayer) Summarize() *stats.Stats {
+	c.Print("%s has %d chips after %d hands.\n", player.Name, player.Chips, player.handsPlayed)
+	return player.Stats
 }
 
 // HELPERS -----------------------------------------------------------------------------------------

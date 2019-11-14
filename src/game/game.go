@@ -3,13 +3,10 @@ package game
 import (
 	c "../constant"
 	"../player"
+	"../stats"
 )
 
 const ()
-
-// type Summary struct {
-// 	[]player.PlayerSummary
-// }
 
 // Game represents a blackjack game
 type Game struct {
@@ -40,7 +37,7 @@ func (game *Game) AddPlayer(playerType int) {
 }
 
 // Play is the main game loop
-func (game *Game) Play() { // *Summary
+func (game *Game) Play() []*stats.Stats {
 	hasActivePlayer := true
 	for hasActivePlayer {
 		// while there are active players
@@ -52,5 +49,5 @@ func (game *Game) Play() { // *Summary
 		game.Table.Payout()
 		game.Table.Reset()
 	}
-	// return game.Table.Summarize()
+	return game.Table.Summarize()
 }

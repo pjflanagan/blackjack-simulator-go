@@ -8,7 +8,7 @@ import (
 
 const (
 	// RANDOM_MAX_BET   = 30
-	RANDOM_MAX_CHIPS = 150
+	RANDOM_MAX_CHIPS = 150 // random only has to win 50 chips to stop playing
 )
 
 // RandomPlayer extends basePlayer

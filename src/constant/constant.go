@@ -51,7 +51,7 @@ const (
 	DEFAULT_CHIPS = 100
 )
 
-var OUTPUT_MODE int
+var OUTPUT_MODE int = OUTPUT_NONE
 
 func SetOutputMode(mode int) {
 	OUTPUT_MODE = mode

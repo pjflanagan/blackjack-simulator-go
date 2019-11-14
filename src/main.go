@@ -3,6 +3,7 @@ package main
 import (
 	c "./constant"
 	"./game"
+	"./stats"
 	"./utils"
 	"log"
 	"os"
@@ -10,31 +11,20 @@ import (
 	"strconv"
 )
 
-var GAME_MODES = []string{"LEARN", "COMPARE", "COMPETE"}
+var GAME_MODES = []string{"LEARN", "COMPARE", "HUMAN", "STORY"}
 
 func main() {
 	mode, min, decks := readArgs()
-	game := game.NewGame(min, decks)
 	switch mode {
 	case "LEARN":
-		// TODO: a few go routines
-		c.SetOutputMode(c.OUTPUT_NONE)
-		game.AddPlayer(c.TYPE_LEARNER)
+		learn(min, decks)
+	case "STORY":
+		story(min, decks)
 	case "COMPARE":
-		// TODO: two versions of this, go routines that compute house odds for each,
-		// and a version that just does one with a log for me to read
-		game.AddPlayer(c.TYPE_RANDOM)
-		game.AddPlayer(c.TYPE_BASIC)
-		game.AddPlayer(c.TYPE_COUNTER)
-	case "COMPETE":
-		c.SetOutputMode(c.OUTPUT_HUMAN)
-		game.AddPlayer(c.TYPE_RANDOM)
-		game.AddPlayer(c.TYPE_BASIC)
-		game.AddPlayer(c.TYPE_COUNTER)
-		game.AddPlayer(c.TYPE_HUMAN)
+		compare(min, decks)
+	case "HUMAN":
+		human(min, decks)
 	}
-	// TODO: Play() should return a game.Summary object, so we can compile results here like odds and the scenario map
-	game.Play()
 }
 
 func readArgs() (mode string, min int, decks int) {
@@ -63,4 +53,41 @@ func readArgs() (mode string, min int, decks int) {
 	}
 
 	return
+}
+
+func story(min int, decks int) {
+	c.SetOutputMode(c.OUTPUT_LOG)
+	game := game.NewGame(min, decks)
+	game.AddPlayer(c.TYPE_RANDOM)
+	game.AddPlayer(c.TYPE_BASIC)
+	game.AddPlayer(c.TYPE_COUNTER)
+	game.Play()
+}
+
+func human(min int, decks int) {
+	c.SetOutputMode(c.OUTPUT_HUMAN)
+	game := game.NewGame(min, decks)
+	game.AddPlayer(c.TYPE_RANDOM)
+	game.AddPlayer(c.TYPE_BASIC)
+	game.AddPlayer(c.TYPE_COUNTER)
+	game.AddPlayer(c.TYPE_HUMAN)
+	game.Play()
+}
+
+func compare(min int, decks int) {
+	for i := 0; i < 20; i++ {
+		go func() []*stats.Stats {
+			c.SetOutputMode(c.OUTPUT_NONE)
+			game := game.NewGame(min, decks)
+			game.AddPlayer(c.TYPE_LEARNER)
+			return game.Play()
+		}()
+	}
+}
+
+func learn(min int, decks int) {
+	c.SetOutputMode(c.OUTPUT_NONE)
+	game := game.NewGame(min, decks)
+	game.AddPlayer(c.TYPE_LEARNER)
+	game.Play()
 }

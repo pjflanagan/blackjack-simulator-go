@@ -1,18 +1,9 @@
 
-
 default: build
 
 build:
 	rm -rf ./bin && mkdir -p ./bin
 	go build -o ./bin/blackjack ./src/main.go
-
-run: human
-
-compare:
-	./bin/blackjack COMPARE 10 6 > out/log.txt
-
-human:
-	./bin/blackjack COMPETE 10 1
 
 test:
 	go test ./src/cards
@@ -22,3 +13,21 @@ test:
 clean:
 	reset
 	rm ./out/*.csv
+
+# run modes
+
+run: human
+
+learn:
+	./bin/blackjack LEARN 10 6
+
+story:
+	./bin/blackjack STORY 10 6 > ./out/log.txt
+
+compare:
+	./bin/blackjack COMPARE 10 6
+
+human:
+	./bin/blackjack HUMAN 10 1
+
+

@@ -4,6 +4,7 @@ import (
 	"../cards"
 	c "../constant"
 	"../player"
+	"../stats"
 )
 
 const ()
@@ -20,6 +21,10 @@ type Table struct {
 
 // NewTable returns a table with defaults
 func NewTable(minBet int, deckCount int) *Table {
+	c.Print("\n\n======= NEW GAME =======\n")
+	c.Print("%d decks in the shoe. \n", deckCount)
+	c.Print("%d minimum bet. \n", minBet)
+
 	return &Table{
 		Shoe:      cards.NewShoe(deckCount),
 		Dealer:    NewDealer(),
@@ -202,6 +207,17 @@ func (table *Table) Reset() {
 		table.count = 0
 	}
 	table.Dealer.Reset()
+}
+
+// S
+
+func (table *Table) Summarize() (gameStats []*stats.Stats) {
+	c.Print("\n\n======= SUMMARY =======\n")
+	for _, player := range table.Players {
+		s := player.Summarize()
+		gameStats = append(gameStats, s)
+	}
+	return
 }
 
 // HELPERS -----------------------------------------------------------------------------------------

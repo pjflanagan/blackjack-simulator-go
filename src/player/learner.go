@@ -33,7 +33,6 @@ type LearnerPlayer struct {
 	originalScenario cards.Scenario                         // the scenario on the deal
 	lastMove         int                                    // int represents the last move made
 	scenarios        map[cards.Scenario]map[int]*resultData // all of the scenarios played by this player
-	playedHands      int                                    // count of all the hands played so we quit eventually
 }
 
 // NewLearnerPlayer returns a new random player with name Random
@@ -55,7 +54,6 @@ func (player *LearnerPlayer) CanBet(minBet int) bool {
 // this bet does not call the parent because we don't want to subtract chips from the learner
 func (player *LearnerPlayer) Bet(minBet int, trueCount float32) {
 	c.Print("%s bets the minumum of %d chips.\n", player.Name, minBet)
-	player.playedHands++
 	player.Hands[0].Wager = minBet
 	player.Status = c.PLAYER_ANTED
 	return
@@ -66,12 +64,12 @@ func (player *LearnerPlayer) Bet(minBet int, trueCount float32) {
 // CheckDealtHand checks to see if we should record this hand
 func (player *LearnerPlayer) CheckDealtHand(dealerHand *cards.Hand, dealerBlackjack bool) {
 	player.checkDealtHand(dealerHand, dealerBlackjack)
-	if player.Status != c.PLAYER_JEPORADY {
+	if !player.StatusIs(c.PLAYER_JEPORADY) {
 		player.shouldRecordHand = false
-		if player.Status == c.PLAYER_BLACKJACK {
+		if player.StatusIs(c.PLAYER_BLACKJACK) {
 			c.Print("%s hit blackjack with a %s!\n", player.Name, player.Hands[0].StringShorthandReadable())
 		}
-	} else if player.Status == c.PLAYER_JEPORADY {
+	} else if player.StatusIs(c.PLAYER_JEPORADY) {
 		c.Print("%s was dealt %s. (%s, %d)\n",
 			player.Name, player.Hands[0].StringShorthandReadable(),
 			player.Hands[0].StringScenarioCode(false),
@@ -126,9 +124,9 @@ func (player *LearnerPlayer) Payout(dealerHand *cards.Hand) {
 	player.resultPayout(0, result)
 	player.Chips = 100
 
-	if player.playedHands > LEARNER_MAX_PLAYED_HANDS {
+	if player.handsPlayed > LEARNER_MAX_PLAYED_HANDS {
 		player.LeaveSeat()
-		player.Summarize()
+		player.scenariosToCsv() // TODO: move to stats
 	}
 }
 
@@ -189,14 +187,10 @@ func (player *LearnerPlayer) Reset(minBet int) {
 	player.lastMove = 0
 	player.Chips = 100
 	player.Status = c.PLAYER_READY
+	player.handsPlayed++
 }
 
 // SUMMARY -----------------------------------------------------------------------------------------
-
-func (player *LearnerPlayer) Summarize() (str string) {
-	player.scenariosToCsv()
-	return ""
-}
 
 func (player *LearnerPlayer) scenariosToCsv() {
 	// stay and double represent the expected gain, hit represens the odds of not busting
