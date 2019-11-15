@@ -3,6 +3,7 @@ package player
 import (
 	"../cards"
 	c "../constant"
+	"../utils"
 	"fmt"
 	"os"
 	"time"
@@ -199,8 +200,8 @@ func (player *LearnerPlayer) scenariosToCsv() {
 			str,
 			scenario.HandString,
 			scenario.UpcardValue,
-			toPercent(result[c.MOVE_STAY].successCount, result[c.MOVE_STAY].count),
-			toPercent(result[c.MOVE_HIT].successCount, result[c.MOVE_HIT].count),
+			utils.ToPercent(result[c.MOVE_STAY].successCount, result[c.MOVE_STAY].count),
+			utils.ToPercent(result[c.MOVE_HIT].successCount, result[c.MOVE_HIT].count),
 			result[c.MOVE_STAY].count+result[c.MOVE_HIT].count,
 		)
 	}
@@ -209,11 +210,4 @@ func (player *LearnerPlayer) scenariosToCsv() {
 	defer f.Close()
 	f.WriteString(str)
 	f.Sync()
-}
-
-func toPercent(num int, denom int) string {
-	if denom == 0 {
-		return "NA"
-	}
-	return fmt.Sprintf("%.2f%%", float32(num)/float32(denom)*100)
 }

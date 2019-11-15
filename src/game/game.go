@@ -14,9 +14,9 @@ type Game struct {
 }
 
 // NewGame returns a game with defaults
-func NewGame(minBet int, deckCount int) *Game {
+func NewGame(minBet int, deckCount int, runNumber int) *Game {
 	return &Game{
-		Table: NewTable(minBet, deckCount),
+		Table: NewTable(minBet, deckCount, runNumber),
 	}
 }
 

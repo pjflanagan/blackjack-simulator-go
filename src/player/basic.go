@@ -35,6 +35,7 @@ func makeScenarioMoveMap() {
 	if err != nil {
 		log.Fatalln("Couldn't open the csv file", err)
 	}
+	defer csvfile.Close()
 
 	// Parse the file
 	r := csv.NewReader(csvfile)

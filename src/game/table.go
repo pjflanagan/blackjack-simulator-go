@@ -20,13 +20,13 @@ type Table struct {
 }
 
 // NewTable returns a table with defaults
-func NewTable(minBet int, deckCount int) *Table {
+func NewTable(minBet int, deckCount int, runNumber int) *Table {
 	c.Print("\n\n======= NEW GAME =======\n")
 	c.Print("%d decks in the shoe. \n", deckCount)
 	c.Print("%d minimum bet. \n", minBet)
 
 	return &Table{
-		Shoe:      cards.NewShoe(deckCount),
+		Shoe:      cards.NewShoe(deckCount, runNumber),
 		Dealer:    NewDealer(),
 		Players:   []player.Player{},
 		minBet:    minBet,

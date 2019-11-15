@@ -6,10 +6,12 @@ import (
 	"./player"
 	"./stats"
 	"./utils"
+	"fmt"
 	"log"
 	"os"
 	"reflect"
 	"strconv"
+	// "sync"
 )
 
 var GAME_MODES = []string{"LEARN", "COMPARE", "HUMAN", "STORY"}
@@ -72,7 +74,7 @@ var COUNTER_PLAYER_RULES_STORY = player.PlayerRules{
 
 func story(min int, decks int) {
 	c.SetOutputMode(c.OUTPUT_LOG)
-	game := game.NewGame(min, decks)
+	game := game.NewGame(min, decks, 0)
 	game.AddPlayer(c.TYPE_RANDOM, &RANDOM_PLAYER_RULES_STORY)
 	game.AddPlayer(c.TYPE_BASIC, &BASIC_PLAYER_RULES_STORY)
 	game.AddPlayer(c.TYPE_COUNTER, &COUNTER_PLAYER_RULES_STORY)
@@ -85,7 +87,7 @@ var HUMAN_PLAYER_RULES = player.PlayerRules{}
 
 func human(min int, decks int) {
 	c.SetOutputMode(c.OUTPUT_HUMAN)
-	game := game.NewGame(min, decks)
+	game := game.NewGame(min, decks, 0)
 	game.AddPlayer(c.TYPE_RANDOM, &RANDOM_PLAYER_RULES_STORY)
 	game.AddPlayer(c.TYPE_BASIC, &BASIC_PLAYER_RULES_STORY)
 	game.AddPlayer(c.TYPE_COUNTER, &COUNTER_PLAYER_RULES_STORY)
@@ -111,15 +113,19 @@ var COUNTER_PLAYER_RULES_COMPARE = player.PlayerRules{
 }
 
 func compare(min int, decks int) {
-	for i := 0; i < 20; i++ {
-		go func() []*stats.Stats {
-			c.SetOutputMode(c.OUTPUT_NONE)
-			game := game.NewGame(min, decks)
-			game.AddPlayer(c.TYPE_RANDOM, &RANDOM_PLAYER_RULES_COMPARE)
-			game.AddPlayer(c.TYPE_BASIC, &BASIC_PLAYER_RULES_COMPARE)
-			game.AddPlayer(c.TYPE_COUNTER, &COUNTER_PLAYER_RULES_COMPARE)
-			return game.Play()
-		}()
+	var allStats []*stats.Stats
+	for i := 0; i < 1000; i++ {
+		c.SetOutputMode(c.OUTPUT_NONE)
+		game := game.NewGame(min, decks, i)
+		game.AddPlayer(c.TYPE_RANDOM, &RANDOM_PLAYER_RULES_COMPARE)
+		game.AddPlayer(c.TYPE_BASIC, &BASIC_PLAYER_RULES_COMPARE)
+		game.AddPlayer(c.TYPE_COUNTER, &COUNTER_PLAYER_RULES_COMPARE)
+		gameStats := game.Play()
+		allStats = append(allStats, gameStats...)
+	}
+	finalStats := stats.HouseOdds(allStats)
+	for _, stat := range finalStats {
+		fmt.Printf("%s strategy can expect a return of %f on each hand.\n", stat.GetStrategy(), stat.ExpectedGain())
 	}
 }
 
@@ -131,7 +137,7 @@ var LEARNER_PLAYER_RULES = player.PlayerRules{
 
 func learn(min int, decks int) {
 	c.SetOutputMode(c.OUTPUT_NONE)
-	game := game.NewGame(min, decks)
+	game := game.NewGame(min, decks, 0)
 	game.AddPlayer(c.TYPE_LEARNER, &LEARNER_PLAYER_RULES)
 	game.Play()
 }

@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"reflect"
 )
 
@@ -24,4 +25,11 @@ func Round(val float64) int {
 		return int(val - 0.5)
 	}
 	return int(val + 0.5)
+}
+
+func ToPercent(num int, denom int) string {
+	if denom == 0 {
+		return "NA"
+	}
+	return fmt.Sprintf("%.2f%%", float32(num)/float32(denom)*100)
 }

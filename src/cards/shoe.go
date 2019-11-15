@@ -20,14 +20,16 @@ type Shoe struct {
 	deck            []*Card
 	discards        []*Card
 	reshuffleMarker int
+	runNumber       int
 }
 
 // NewShoe returns a new shoe with a shuffled deck
-func NewShoe(deckCount int) *Shoe {
+func NewShoe(deckCount int, runNumber int) *Shoe {
 	if deckCount < 1 {
 		deckCount = 1
 	}
 	shoe := new(Shoe)
+	shoe.runNumber = runNumber
 	for decks := 0; decks < deckCount; decks++ {
 		for face := 1; face <= FACES; face++ {
 			for cardinality := 1; cardinality <= CARDINALITIES; cardinality++ {
@@ -53,7 +55,7 @@ func (shoe *Shoe) Shuffle() {
 	// reset the deck
 	shoe.deck = make([]*Card, len(allCards))
 	// shuffle
-	rand.Seed(time.Now().UnixNano())
+	rand.Seed(time.Now().UnixNano() + int64(shoe.runNumber))
 	randomDeckIdxs := rand.Perm(len(allCards))
 	for i, deckIdx := range randomDeckIdxs {
 		shoe.deck[deckIdx] = allCards[i]

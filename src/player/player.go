@@ -317,7 +317,7 @@ func (player *basePlayer) LeaveSeat() {
 
 func (player *basePlayer) Summarize() *stats.Stats {
 	c.Print("%s has %d chips after %d hands.\n", player.Name, player.Chips, player.handsPlayed)
-	return stats.NewStats(player.Name, player.Chips-player.playerRules.StartingChips)
+	return stats.NewStats(player.Name, player.Chips-player.playerRules.StartingChips, player.handsPlayed)
 }
 
 // HELPERS -----------------------------------------------------------------------------------------
