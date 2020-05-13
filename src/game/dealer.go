@@ -81,10 +81,11 @@ func (dealer *Dealer) Stay() {
 
 // PrintHand prints the dealer's hand
 func (dealer *Dealer) PrintHand() {
-	// if c.OUTPUT_MODE == c.OUTPUT_HUMAN {
-	// 	c.Print("\n===== Dealer Hand =====\n")
-	// 	c.Print("%s\n", dealer.Hand.StringLongformReadable())
-	// } else {
+	// print a divider
+	if c.OUTPUT_MODE == c.OUTPUT_HUMAN {
+		c.Print("\n= Dealer Hand =\n")
+	}
+	// print a blerb
 	if dealer.Hand.Cards[1].IsFaceDown() {
 		c.Print("Dealer is showing %s.\n", dealer.Hand.StringShorthandReadable())
 	} else if dealer.Hand.DidBust() {
@@ -92,5 +93,9 @@ func (dealer *Dealer) PrintHand() {
 	} else {
 		c.Print("Dealer has %s.\n", dealer.Hand.StringShorthandReadable())
 	}
-	// }
+	// print the visial hand
+	if c.OUTPUT_MODE == c.OUTPUT_HUMAN {
+		c.Print("%s\n", dealer.Hand.StringLongformReadable())
+	}
+
 }

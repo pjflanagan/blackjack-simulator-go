@@ -350,7 +350,7 @@ func (player *basePlayer) StatusIs(statuses ...int) bool {
 
 // PrintVisualHand prints the hand in shap of a card
 func (player *basePlayer) PrintVisualHand(handIdx int) {
-	c.Print("\n====== %s's Hand ======\n", player.Name)
-	c.Print("You have a %s.\n", player.Hands[handIdx].StringSumReadable())
+	c.Print("\n= %s's Hand =\n", player.Name)
+	c.Print("Human has a %s.\n", player.Hands[handIdx].StringSumReadable())
 	c.Print("%s\n", player.Hands[handIdx].StringLongformReadable())
 }

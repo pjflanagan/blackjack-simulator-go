@@ -50,7 +50,7 @@ func (player *HumanPlayer) Bet(minBet int, trueCount float32) {
 
 // Move returns string representing the move
 func (player *HumanPlayer) Move(handIdx int, dealerHand *cards.Hand) (move int) {
-	// player.PrintVisualHand(handIdx)
+	player.PrintVisualHand(handIdx)
 	validMoves := player.Hands[handIdx].GetValidMoves(player.Chips)
 	if len(validMoves) == 0 {
 		// this would happen if a player gets a 21 after a split (but we shouldn't go to here)
